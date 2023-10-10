@@ -1,0 +1,37 @@
+SUPERVISED LEARNING
+
+Funzione di loss = minimo della media delle loss su singolo elemento
+Devo definirla perché sia minima non sul dataset, ma su ogni possibile test set,
+Altrimenti vado in overfitting (contrapposto alla generalizzazione)
+Per la regressione ha senso scegliere la loss function "a mano", mentre per
+la classificazione farlo non è scontato, quindi uso un approccio statistico
+scrivendo una pdf condizionata p(y|f(x)). L'idea di base è prevedere il
+valore atteso di questa pdf (poi per la varianza vedremo), f(x) mi dà i parametri
+della pdf. Una buona f è tale che fornendo i parametri alla pdf, i dati del train
+siano molto probabili. Questa cosa è detto principio di maximum likelihood.
+Poi si passa al logaritmo perché computazionalmente è meglio sommare.
+Se assumo pdf gaussiana con logaritmo minimizzo la squared loss.
+
+
+LINEAR MODEL
+
+Chiamo FEATURE un elemento di x (input), e gli assegno un vettore di pesi w
+che ottimizzo con il GD. Se w_j è zero significa che x è inutile nel dataset.
+Bias è importante (slide 14).
+
+Quando devo invertire una roba non invertibile, REGOLARIZZO. Ovvero, aggiungo
+un termine che mi manda full-rank.
+Questo giochino di aggiungere pezzi alla likelihood permette di modificare il
+peso dei vari pezzi della rete (da verificare).
+Verifica anche che sta roba sia un'alternativa al GD (molto costosa)
+
+
+CLASSIFICATION
+Visto che predire con certezza un valore richiederebbe una threshold (e
+perderei informazione) meglio restituire un vettore che assegna una probabilità
+a ciascuna classe (lo spazio di questi vettori si chiama probability simplex).
+La temperatura è un oggetto simpatico, se modifico le probabilità scelgo di
+PENALIZZARE qualcosa. Se metto T < 1 rafforzo il guess del modello ma perde di
+generalità
+
+E VARIANTI DI COSE COME IN ML

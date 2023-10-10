@@ -1,0 +1,9 @@
+Un agente percepisce la realtà attraverso i SENSORI (che generano una sequenza di PERCEZIONI P) e
+modifica lo STATO (rappresentazione dell'ambiente in cui si trova) tramite gli ATTUATORI (che
+mettono in atto le possibili AZIONI A). Nel momento in cui deve raggiungere un OBIETTIVO, 
+
+In quanto razionale, cerca di agire per massimizzare le probabilità di raggiungere il proprio obiettivo.
+Non è un agente onniscente e onnipotente, perché né i sensori sono perfetti né gli attuatori
+coprono tutte le possibili azioni. Quello che si può fare è "tendere" alla scelta migliore.
+Il parametro su cui si basa l'ottimizzazione delle azioni è la PERFORMANCE, in qualsiasi modo
+essa sia definita.

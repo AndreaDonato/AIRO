@@ -1,0 +1,78 @@
+Il termine AI si riferisce a sistemi che mostrano comportamento intelligente nell'analizzare
+l'ambiente e intraprendere azioni per ottenere determinati risultati.
+Possono essere software puro (riconoscitore vocale, Natural Language Processing NLP, ...) o
+avere un supporto hardware (robots, droni, ...).
+Inizialmente (quando c'era principalmente il lato software) si amava testare in particolare il
+NLP, ovvero la capacità di comprendere il linguaggio umano. Ci sono quindi
+
+	- Test di Touring: metto un umano e una AI dietro uno schermo e ci converso, se non so
+		distinguere chi è chi viva l'AI;
+
+	- Winograd Schema Challenge: scrivo frasi ambigue e faccio fare l'analisi logica all'AI.
+
+Ci sono quattro approcci all'AI, dipendentemente da come la si vede: capacità di...
+
+	- Agire come un umano, quindi i test di cui sopra o il riconoscimento vocale/facciale;
+
+	- Pensare come un umano, si entra in neuroscienze e in scienze cognitive (Neural Networks).
+		Si concentra su modelli e algoritmi che imitano il pensiero umano;
+
+	- Pensare razionalmente, ovvero usare la logica per giungere a conclusioni, come dimostrare
+		un teorema matematico;
+
+	- Agire razionalmente, ovvero "fare la cosa giusta" per ottenere un certo risultato.
+
+"Razionale" non è necessariamente "umano", e viceversa. Ci concentriamo sull'ultimo approccio.
+Definiamo AGENTE un'entità che riceve informazioni e agisce. Definiamo AGENTE RAZIONALE un'entità
+che riceve informazioni e agisce razionalmente. Qui ci concentraiamo sui RA (Rational Agents).
+Per ogni problema, cerchiamo il miglior RA (quello con le performance migliori) visto che
+tipicamente la perfetta razionalità è irraggiungibile. I compiti di un AR sono tipicamente:
+
+	- Ricerca in uno spazio di soluzioni complesso;
+
+	- Constraint Satisfaction Problem (CSP), date N variabili con un dominio ben definito, cerca
+		una soluzione che rispetta dei vincoli (es: problema delle 8 regine);
+
+	- Boolean Satisfability Problem (SAT), determina la soluzione di un'espressione booleana;
+
+	- Knowledge Representation (KR), è il problema di come rappresentare i dati in modo che l'AI
+		possa utilizzarli. È un compito svolto in collaborazione con umani, che devono impostare
+		lo schema di partenza e che poi lasciano quanto possibile il compito all'automazione.
+		Tra i modi per rappresentare le informazioni ci sono:
+
+			- Logiche proposizionali, vere o false (es: "il cielo è blu");
+			- Logiche predicative, relazioni tra oggetti (es: "Alice è madre di Bob");
+			- Reti semantiche, relazioni complesse rappresentate con nodi e archi;
+			- Frame, concetti con attributi associati (come una classe);
+			- Ontologie, organizzazione gerarchica di concetti.
+
+		Se la KR è fatta bene, le AI sono in grado di passare al REASONING, che può essere
+
+			- Deduttivo: parto da affermazioni vere e le unisco per trarre una conclusione;
+			- Induttivo: osservo un certo numero di eventi e ne traggo conclusioni;
+			- Abduttivo: provo a dare spiegazioni plausibili a fronte di evidenze sperimentali;
+			- Basato su regole: faccio riferimento a un set di regole per trarre conclusioni;
+			- Probabilistico: faccio riferimento a un set di probabilità o statistiche.
+
+	- Planning, ovvero pianificare le proprie azioni per raggiungere un obiettivo. Riassumendo
+		molto, l'agente parte da uno STATO (rappresentazione dell'ambiente in cui si trova) che
+		appartiene allo SPAZIO DEGLI STATI possibili, e mediante AZIONI decise da ALGORITMI DI
+		PIANIFICAZIONE deve raggiungere uno stato OBIETTIVO. A questo si possono aggiungere
+		livelli di complessità come il tempo, uno scenario multi-agente o una pianificazione
+		(forzatamente) parziale, in cui l'agente non può o non riesce a gestire tutto lo spazio
+		degli stati;
+
+	- Valutazione dell'incertezza circa tutti i punti non deterministici di cui sopra;
+
+Sono invece ad oggi sfide aperte compiti come
+
+	- Affrontare nuovi problemi usando la conoscenza pregressa su argomenti simili;
+	- Trovare le relazioni causali nelle conoscenze acquisite;
+	- Definire concetti come etica e morale.
+
+Ci sta un tizio chiamato Oren Etzioni che ha fatto le leggi dell'AI tipo quelle di Asimov:
+
+	- An AI system must be subject to the full gamut of laws that apply to its human operator;
+	- An AI system must clearly disclose that it is not human;
+	- An AI system cannot retain or disclose confidential information without explicit approval
+		from the source of that information.
