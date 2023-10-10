@@ -1,0 +1,88 @@
+"Idee verdi balenano nel cielo e cavalcano tumultuosamente" è una frase sintatticamente (ma non semanticamente) corretta in italiano.
+
+Le espressioni regolari sono un metodo per verificare se una certa stringa ha una certa forma (quindi è un controllo sintattico).
+Ipotizzando di star programmando in Python e posto di aver incluso la libreria delle espressioni regolari (import re) avrò a disposizione tre funzioni:
+ 
+	- re.search(X, Y, Z): Cerca la prima occorrenza dell'espressione indicata come argomento. Se la trova restituisce vero, falso altrimenti; 
+	
+	- re.finditer(X, Y, Z): Come search, ma trova tutte le occorrenze;
+	
+	- m.group(N): Se m è la variabile a cui ho assegnato il risultato di una delle funzioni precedenti, restituisce quanto trovato.
+
+Cosa sono X, Y ed N?
+
+	- X rappresenta la struttura della sottostringa da cercare. Vi sono diversi modi per specificare come farlo.
+
+		- 'Mario': cerca semplicemente l'occorrenza della sottostringa 'Mario';
+
+		- '^Mario': cerca la sottostringa 'Mario', ma solo se è all'inizio;
+
+		- 'Mario$': cerca la sottostringa 'Mario', ma solo se è alla fine;
+		
+		- 'Mario|Giorgio': cerca l'occorrenza della stringa 'Mario' o di quella 'Giorgio';
+
+		- '[Mario]': cerca una delle lettere tra quadre;			DA VERIFICARE
+
+		- '[^Mario]': cerca una sequenza (DA VERIFICARE) composta da qualsiasi carattere che non compaia tra quadre;
+
+		- '[Mario]*': cerca una sequenza di lunghezza arbitraria contenente i caratteri tra quadre. MMrrarioM, arr e MoiraMro sono sequenze valide;
+			
+			- Equivalente a '[Mario]+'? DA VERIFICARE dovrebbe essere "almeno una ripetizione" mentre * permette di averne zero;
+
+		- '[a-zA-Z ]*': cerca una sequenza contenente caratteri alfabetici maiuscoli o minuscoli e spazi (si ferma quindi quando incontra
+			un numero o un carattere speciale);
+		
+		- 'Mario[a-zA-Z0-9 ]*': cerca una sequenza che inizia con 'Mario' e prosegue con caratteri alfanumerici o spazi (si ferma quindi
+			quando incontra un carattere speciale). Troverò cose del tipo
+
+				Mario Bianchi 340554332			// Ad esempio a partire da Mario Bianchi 340554332 - (- non è lettera, numero o spazio!)
+				Mario ffr EERc e4443
+				Mario308hyr234ufoe b n0e
+
+		- '(M[a-z]*) ([A-Za-Z]*) ([0-9]*)': le parentesi tonde separano i campi. Questa richiesta cerca quindi una stringa che inizi per M e prosegua
+			con un numero arbitrario di lettere minuscole, SPAZIO, una parola di lunghezza arbitraria contenente sia maiuscole che minuscole, SPAZIO,
+			una sequenza arbitrariamente lunga di cifre. Un esempio è 'Mario Bianchi 340554332';
+
+		- '([A-Za-z]{1, 5}) ?([0-9]){5, } ([a-z]{5})': cerca una stringa alfabetica contenente da uno a 5 caratteri, opzionalmente uno spazio,
+			una sequenza di almeno 5 cifre, SPAZIO, una sequenza di esattamente 5 caratteri minuscoli;
+
+		- '([A-Z]{3} ?){2}': cerca una stringa contenente sei caratteri alfabetici maiuscoli opzionalmente inframezzate e/o terminate da uno spazio.
+			Posso quindi ANNIDARE le RegEx;
+
+		- re.search('^[A-Z][a-z]+$', s) ha successo solo se la stringa s è esattamente del tipo lettera maiuscola + N minuscole.
+
+		- 'codice=.{10}': cerca una stringa del tipo 'codice=' seguita da 10 caratteri qualsiasi.
+
+	- Y rappresenta la variabile in cui effettuare la ricerca;
+
+	- Z rappresenta ulteriori specifiche, come re.DOTALL (ingora l'a capo) o re.IGNORECASE (non distingue maiuscole e minuscole);
+
+	- N si omette nel caso si usi re.search. Se si usa re.finditer, è l'N-esima occorrenza trovata.
+
+NB: se ci sono occorrenze multiple viene restituita la più lunga (longest matching).
+Se ad esempio ho un elenco telefonico della forma
+
+	elenco = 'Edmondo Giovanardi 06666666 - Mario Rossi 06050430 - Minnie Topolino 340055667 - ...'
+
+la scrittura
+
+	m = re.finditer('(M[a-z]*) ([A-Za-Z]*) ([0-9]*)', elenco)
+
+	// Pseudocodice perché al momento non ricordo Python e non ho provato le funzioni
+	i = 1
+	while(c'è un'occorrenza)
+		print m.group(i)
+		i++
+
+stampa
+
+	Mario Rossi 06050430
+	Minnie Topolino 340055667
+
+Esempi di implementazione sono la verifica di una data o del codice fiscale.
+
+ALTRE OPERAZIONI
+
+	- re.split('X', Y) restituisce le sottostringhe ottenute separando la stringa Y in corrispondenza dei separatori definiti in X;
+
+	- re.sub('X', Y, Z) restituisce la stringa Z in cui ogni occorrenza di X è sostituita da Y.

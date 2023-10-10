@@ -1,0 +1,234 @@
+Le strutture dati di tipo parametrico (array, matrici, ...) memorizzano solo tipi di dato omogenei.
+Per rilassare questa condizione e memorizzare diversi tipi di dato in un'unica struttura introduciamo
+la variabili di TIPO RECORD, utilizzando il comando STRUCT.
+
+	struct nome_tag							// es: persona. E'un prototipo di definizione del tipo
+		{									// nome_tag, ovvero una definizione di tag.
+		dichiarazione-variabile-1;			// es: char* nome;
+		...									// es: short int giorno_di_nascita;
+		dichiarazione-variabile-n;
+
+	} lista-variabili;						// es: persona_1, persona_2;
+
+Un paio di cose da notare:
+
+	-Se ometto nome_tag: tutte e sole le variabili-oggetto (persona_i) vanno dichiarate subito, e il
+	 	compilatore assegna fin da subito la memoria (contigua) per i campi (nome, giorno_di_nascita) per
+	 	ciascuna di esse. Per dichiarare in un secondo momento altre variabili con gli stessi campi dovrei
+	 	riscrivere la struct, e non sarebbero comunque identificate come oggetti dello stesso tipo; 
+
+	- Se ometto lista-variabili: posso dichiararle nel main esattamente come per un qualsiasi altro tipo:
+
+		struct nome_tag var_1, var_n;
+
+	- Non ha senso, per quanto detto, omettere entrambi.
+
+Alcune di queste restizioni vengono rilassate compilando in C99.
+Quindi la struct è una definizione di tipo? Quasi. Ho solo una struct con un tag, per cui devo sempre
+specificare entrambe le cose. Per snellire e creare il tipo record devo usare la keyword TYPEDEF.
+
+	typedef struct nome_tag nome_tipo;		// Se ho già scritto il codice sopra (senza lista-variabili?)
+											// Ovvero definizione di tipo su definizione di tag 
+oppure
+
+	typedef struct							// Da zero, ovvero definizione di tipo senza definizione di tag
+	{
+		dichiarazione-variabile-1;
+		...
+		dichiarazione-variabile-n;
+
+	}  nome_tipo;							// es: Persona;
+
+Vagamente contorto, ma è un modo primitivo per creare qualcosa di simile a classi e oggetti. Quando voglio
+definire una variabile di tipo nome_tipo non ho più bisogno della keyword struct.
+
+	nome_tipo var_1, var_n;
+
+Ha senso usare una libreria per dichiarare questi nuovi tipi di dato:
+
+	// File persona.h
+	#ifndef PERSONA_H						// Questo nome non l'ho capito al 100%, credo abbia un senso
+	#define PERSONA_H						// con #ifndef-#endif posso scrivere la #define su più righe
+	
+	typedef struct							// Ho capito: sta "taggando" la definizione della struct
+	{										// Persona in modo da poterne controllare l'esistenza solo
+		char* nome;							// controllando se è definito il "tag".
+		char* cognome;
+		short int giorno;
+		short int mese;
+		short int anno;
+	} Persona;
+	
+	#endif
+
+A questo punto per accedere ai campi della struct si usa l'operatore punto (.):
+
+	Persona p1 ;
+	p1.nome 	= "Mario" 	;
+	p1.cognome 	= "Rossi" 	;
+	p1.giorno 	= 7			;
+	p1.mese 	= 4			;
+	p1.anno 	= 1964		;
+
+Si possono anche inizializzare i campi in altri due modi:
+
+	Persona p1 = {"Mario", "Rossi", 7, 4, 1964};		// L'ordine è vincolante
+
+oppure
+
+	Persona p1 = 										
+		{
+			.cognome 	= "Rossi",						// L'ordine non è vincolante
+			.giorno 	= 7,
+			.mese 		= 4,
+			.nome 		= "Mario",
+			.anno 		= 1964
+		};
+
+MEMORIA
+Dal punto di vista della memoria, la struct definita con typedef è una variabile (che poi è
+incidentalmente composta da più campi) trattata come tipo primitivo. Quindi NON è un puntatore, ma
+posso definire un puntatore a record.
+	
+	Persona *p = &p1;									// p punta al record p1
+	printf("Nome: %s\n", (*p).nome);					// Parentesi necessaria: . ha priorità su *
+														// Se non la mettessi avrei *(p.nome)
+	// Definizione analoga: (*p).nome = p->nome
+
+Segue che:
+
+	- Il passaggio a funzione segue le stesse regole dei tipi primitivi (e puntatori a tipi primitivi);
+
+	- Una funzione può restituire un record;
+
+	- L'operazione di assegnazione p1 = p2 COPIA i campi della struct p2 in quelli di p1 (posto
+		naturalmente che siano dello stesso tipo). E' la principale differenza concettuale con gli array
+		(oltre all'omogeneità del contenuto), per i quali l'assegnazione è riferita al puntatore e non al
+		contenuto (per copiare il quale dovrei ciclare su tutti gli elementi). Notare che eventuali array
+		allocati staticamente nella struct vengono a loro volta copiati, e che questo meccanismo permette
+		come side-effect la copia di array statici;
+
+	- (Controintuitivamente) Gli operatori di confronto == e != NON sono applicabili ai record;
+
+	- Posso allocare dinamicamente una variabile di tipo record.
+
+			Persona *p1 = (Persona*) malloc(sizeof(Persona));
+			...
+			free(p1);
+
+		Questo NON alloca memoria per eventuali campi di tipo puntatore, pertanto è necessario allocarli
+		e deallocarli separatamente. 
+
+
+RECORD PER MATRICI
+E' particolarmente utile definire le matrici in una struct.
+
+	typedef struct
+	{
+		int rows;
+		int cols;
+		float **elemento;
+	
+	} matrix;
+
+	// Alloco spazio per la struct
+	matrix *matrice = (matrix*) malloc(sizeof(matrix));
+
+	// Alloco l'array di array (leggi: la colonna di puntatori alle righe)
+	matrice->**elemento = (float**) calloc(matrice->rows, sizeof(float*))
+
+	// Alloco le singole righe
+	for(int i = 0; i < matrice->rows; i++)
+	{
+		matrice->elemento[i] = (float*) calloc(matrice->cols, sizeof(float));
+	}
+
+	// Accedo all'elemento ij della matrice creata
+	matrice->elem[i][j]
+
+	
+RECORD ANNIDATI ED AUTOREFERENZIALI
+E' possibile fare riferimento a un record dentro a un altro record. Ad esempio, una struct che definisce un punto
+
+	typedef struct
+	{
+		float x;
+		float y;
+		float z;
+	} Punto;
+
+può essere chiamata in una struct che ne definisce il colore:
+
+	typedef struct
+	{
+		Punto punto;
+		char colore[256];
+	} PuntoColorato;
+
+Se nel main dichiaro
+
+	Punto p;
+	PuntoColorato pc;
+
+posso accedere ai campi di p in modo equivalente con p.x e pc.punto.x.
+Questa cosa NON si può estendere in modo naturale se il record annidato è dello stesso tipo del chiamante, perché
+il C non permette la dichiarazione di variabili di tipo non ancora definito.
+
+	typedef struct
+	{
+		Punto x;			// Illegale: Punto non è ancora stato definito, ma per esserlo ha bisogno di esselo già
+		char nome;
+	} Punto;	
+
+Si può superare questa cosa usando il tag della struct.
+
+	#ifndef PARENTE_H
+	#define PARENTE_H
+
+	struct Parente 							// Tag di struttura
+	{
+		char nome [256];
+		char cognome [256];
+		struct parente *padre;				// Dichiarare un puntatore a un tipo non definito è possibile
+		struct parente *madre;
+	};
+
+	typedef struct parente Parente ; 		// Definizione di tipo
+	#endif
+
+Chiaramente, i record possono essere componenti di un vettore.
+
+
+UNIONI
+Come le struct, ma i campi sono disponibili uno alla volta. Usato (sempre meno) per variabili che possono assumere
+valori corrispondenti a tipi diversi.
+
+	#ifndef CHARDOUBLE_H
+	#define CHARDOUBLE_H
+	
+	typedef union
+	{
+		char c;
+		double d;							// Assegna una locazione di memoria pari al più lungo dei campi
+											// in termini di memoria: char(1byte)+double(8byte) assegna 8byte.
+	} chardouble;
+	#endif
+
+Essendo la memoria di tutti i campi condivisa, è rilevante solo l'ultima assegnazione. Se dico chardouble.d = 7.7
+e poi chrdouble.c = 'a', nel primo byte verrà salvata 'a'. Se quindi chiamo chardouble.d non otterrò 7.7, ma una
+cosa strana che ha come primo byte i bit corrispondenti ad 'a'.
+
+RECORD ENUMERATO
+
+	typedef enum
+	{
+		ALTO,
+		BASSO,
+		DESTRA,
+		SINISTRA
+
+	} Direzione;
+
+	Direzione d;							// Può essere usata come variabile che assume valori (ALTO, BASSO, ...)
+
+

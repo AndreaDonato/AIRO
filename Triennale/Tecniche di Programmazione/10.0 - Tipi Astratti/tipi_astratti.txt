@@ -1,0 +1,130 @@
+Come l'algoritmo è indipendente dalla sua implementazione, così lo è un tipo di dato astratto.
+In generale è caratterizzato da
+
+	- DOMINIO: Si distinguono Dominio di Interesse (ovvero il dominio "proprio" del tipo, Z per gli int,
+		vero/falso per bool, ...) ed eventuali domini di appoggio per le funzioni (es: un confronto tra char
+		aventi come dominio proprio il codice ASCII richiede il dominio di appoggio {vero, falso} del tipo bool).
+		Si definisce a partire dai TIPI CONCRETI del linguaggio di programmazione;
+
+	- COSTANTI: Valori di interesse nel dominio (es: true/false per bool, pigreco per float e double). Si
+		definiscono attraverso i COSTRUTTI del linguaggio;
+
+	- FUNZIONI proprie del tipo: Insieme delle operazioni che si possono svolgere con elementi del tipo astratto,
+		includendo endomorfismi (es: AND(bool a, bool b) -> bool) e non (es: confronto(char a, char b) -> bool).
+		In quest'ultimo caso si avranno domini secondari. Per ogni funzione è necessario specificare le condizioni
+		dell'input (PRECONDIZIONI, es: per la divisione x/y è y != 0) e dell'output (POSTCONDIZIONI, es: definisco
+		il risultato dell'operazione NAND come NOT(A AND B)). Si definiscono a partire dalle funzioni del
+		linguaggio.
+
+Permette di scrivere un algoritmo focalizzandosi sul cosa fare piuttosto che sul come farlo.
+Esempi di dato astratto più comuni possono essere
+
+	- Lineari: 		liste, pile, code, insiemi;				// Singola chiamata ricorsiva
+	- Non Lineari:	alberi binari, alberi n-ari, grafi.		// Più di una chiamata ricorsiva
+
+La dichiarazione in pseudocodice del tipo astratto è una cosa del tipo
+
+	TipoAstratto T
+
+		D_i = ... 	// Descrizione dell'i-esimo dominio
+
+		C_j = ... 	// Descrizione della j-esima costante
+
+		F_k = ...	// Descrizione della k-esima funzione
+
+	FineTipoAstratto
+
+SCHEMI REALIZZATIVI
+A questo punto posso passare a scegliere il linguaggio di implementazione (C) e lo schema realizzativo. Quest'ultimo
+è particolarmente importante, solitamente si utilizza lo schema FUNZIONALE per la manipolazione di valori, mentre si
+preferisce lo schema SIDE-EFFECT per strutture che rappresentano entità (es: studenti, automobili, ...). In generale
+(ma si potrebbe approfondire molto) lo schema side-effect è utilizzato per casi in cui è comodo modificare l'input,
+mentre il funzionale per casi in cui non serve o non va fatto.
+
+CONDIVISIONE DI MEMORIA
+E' possibile scrivere le funzioni in modo tale che dati diversi condividano o non condividano memoria. Ad esempio,
+se voglio modificare il primo elemento di una SCL mantenendo anche quella di partenza posso creare un nuovo primo
+nodo che punta al secondo, senza cancellare il vecchio. Si ottengono così due SCL distinte che però puntano agli
+stessi indirizzi dal secondo nodo in poi. Questo si realizza tipicamente con la programmazione FUNZIONALE, ma è
+necessario ricordare sempre quali sono le zone condivise per evitare INTERFERENZA (modificando la seconda SCL
+modifico senza volerlo anche la prima). La condivisione porta benefici in efficienza e ingombro della memoria.
+
+SCHEMI VALIDI
+Pur essendo possibili in linea teorica tutte e quattro combinazioni delle scelte funzionale/side-effect e con/senza
+condivisione di memoria, gli schemi più sensati sono solo due:
+
+	- Side-Effect senza condivisione, per manipolare dati mutabili;
+
+	- Funzionale con condivisioni, per manipolare dati immutabili.
+
+Seguono esempi di implementazione in C di bool, numero complesso, coppia. Saltiamo al tipo insieme.
+
+TIPO ASTRATTO INSIEME
+
+	TipoAstratto set(set_type)
+
+		set 					// Insieme di tutti i possibili insiemi (dominio d'interesse)
+		set_type				// Dominio degli elementi dell'insieme  (dominio secondario)
+		bool					// Codominio delle funzioni successive (in questo caso si può omettere, è standard)
+
+		empty_set() -> set 					// Le costanti possono essere definite come funzioni senza argomenti
+		is_empty(set s) -> bool				// true se l'insieme in input è vuoto
+		insert(set s, set_type x) -> set	// Inserisce x nell'insieme s
+		delete(set s, set_type x) -> set	// Rimuove x dall'insieme s
+		is_in(set s, set_type x) -> bool	// true se x appartiene all'insieme s
+
+	FineTipoAstratto
+
+A partire da queste funzioni primitive è possibile costruirne di più complesse (unione, intersezione, ...).
+A seconda dello schema realizzativo scelto le funzioni avranno segnatura diversa. Namely,
+
+	set insert(set s, set_type x);			// Funzionale con condivisione
+	void insert(set *s, set_type x);		// Side-Effect senza condivisione
+
+Posso implementare un insieme in C tramite array o SCL. La segnatura delle funzioni primitive NON CAMBIA con
+l'implementazione (TRASPARENZA), ma solo con lo schema realizzativo. Per quanto detto finora, però, nel momento in
+cui cerco di accedere a un elemento dell'insieme ho bisogno di sapere l'implementazione (elemento di un array,
+quindi indicizzato, o valore dentro una SCL, quindi SCL->info). Posso risolvere costruendo un ITERATORE.
+
+TIPO ASTRATTO ITERATORE
+Permette di accedere agli elementi di una collezione senza preoccuparsi dell'implementazione.
+Intuitivamente, si interpone tra il CLIENTE e la collezione.
+
+	TipoAstratto Iteratore(collection, collection_type)
+
+		it 						// Dominio degli iteratori
+		collection 				// Dominio delle collezioni (array, list, ...)
+		collection_type			// Dominio del tipo di dato delle collezioni (int, cha, ...)
+
+		IT_create(collection c) -> it 		// Crea un iteratore che punta al primo elemento della collezione c
+		IT_has_next(it i) -> bool			// true se l'iteratore punta a un elemento valido
+		IT_next(it i) -> collection_type	// Restituisce il valore puntato, poi il cursore si sposta al successivo
+
+	FineTipoAstratto
+
+Questa formulazione permette al cliente di vedere nella libreria sempre le stesse funzioni (quelle dell'iteratore)
+indipendentemente dall'implementazione su cui lavora il codice nel file C. Posso sostituire SCL con array nelle
+funzioni senza che venga fatta alcuna modifica al file .h o al main.
+
+TIPO ASTRATTO LISTA
+SCL ordinata, niente di nuovo. Le funzioni primitive hanno nomi simpatici.
+
+		empty_list() -> list
+		is_empty(list l) -> bool				// true se la lista in input è vuota
+		cons(list l, list_type x) -> list		// Restituisce la lista in input ma avente x come primo nodo
+		car(list l) -> list_type			 	// [list != NULL] Restituisce il valore del primo nodo
+		cdr(list l) -> list 					// [list != NULL] Restituisce la lista senza il primo nodo
+
+TIPO ASTRATTO CODA
+First In First Out - Oltre all'ovvio abbiamo
+
+		TAIL_in(tail t, tail_type x) -> tail 	// Aggiunge x in coda
+		TAIL_out(tail t) -> tail 				// [!= NULL] Restituisce la coda in input senza il nodo di testa
+		TAIL_first(tail t) -> tail_type			// [!= NULL] Restituisce il valore del nodo di testa
+
+TIPO ASTRATTO PILA
+Last In Last Out - Oltre all'ovvio abbiamo
+
+		push(stack s, stack_type x) -> stack	// Aggiunge un nodo contenente il valore x in cima alla pila
+		pop(stack s) -> stack 					// [!= NULL] Restituisce la pila in input senza il nodo in cima
+		top(stack s) -> stack_type				// [!= NULL] Restituisce il valore del nodo in cima

@@ -1,0 +1,130 @@
+Gli array presentano alcune limitazioni, tra cui la dimensione fissata e la difficoltà di aggiunta di un elemento.
+Una Struttura Collegata Lineare è una catena di record in cui ognuno ne chiama ricorsivamente un altro.
+
+	typedef ...TipoInfoSCL;		// Definisce il tipo di informazione della SCL. Non serve se esiste già (es: int).
+	
+	struct ElemSCL				// Dichiaro la struct "Elemento della SCL"
+	{
+		TipoInfoSCL info;		// contenente il dato del rispettivo tipo
+		struct ElemSCL *next;	// e un puntatore all'elemento successivo della catena.
+	};
+
+	typedef struct ElemSCL TipoNodoSCL;		// Definizioni di comodo: chiamo la struct "TipoNodoSCL"
+	typedef TipoNodoSCL* TipoSCL;			// e il puntatore a questo tipo di struttura (è più chiaro distinguere
+												esplicitamente la struttura dal suo puntatore).
+
+Notare che NON POSSO definire la struct direttamente col typedef, perché devo chiamarla dentro la sua stessa
+definizione. Mi serve quindi il tag ElemSCL. A questo punto creiamo e colleghiamo dei nodi.
+
+	
+	TipoSCL scl = (TipoNodoSCL*) malloc(sizeof(TipoNodoSCL));	// Ricordiamo che TipoNodoSCL* == TipoSCL.
+	scl->info = a;												// Assegno il valore di a al campo info.
+	scl->next = NULL;											// Al momento non c'è un modo successivo.
+	TipoSCL temp = (TipoNodoSCL*) malloc(sizeof(TipoNodoSCL));	// Nuovo nodo
+	temp->info = b;												// il cui valore del campo info è b
+	temp->next = NULL;											// che attualmente non punta a un nodo successivo
+	scl->next = temp;											// mentre ora il primo nodo punta al secondo.
+
+
+OPERAZIONI SUL NODO IN PRIMA POSIZIONE
+Se voglio creare una funzione per aggiungere un nodo devo stare attento. Ipotizziamo di partire da una SCL vuota,
+ovvero un puntatore TipoSCL scl = NULL. Per creare un nodo in prima posizione bisogna
+
+	1 - Creare il nuovo nodo;
+	2 - Assegnare al vecchio puntatore l'indirizzo del nuovo nodo;
+	3 - Assegnare al puntatore del nuovo nodo l'indirizzo puntato dal vecchio.
+
+Il secondo step implica che dentro la funzione devo poter modificare il puntatore che passo come parametro (e non il
+suo contenuto!). Per questo motivo devo passare un puntatore a TipoSCL (che a sua volta è un puntatore, da cui si
+capisce il senso della definizione "di comodo" effettuata in precedenza: evitare il doppio asterisco).
+
+	void addSCL(TipoSCL *scl_new, TipoInfoSCL e) 				// scl_new è una variabile del RDA di addSCL che
+																// punta all'indirizzo di scl fuori dalla funzione.
+	{
+		TipoSCL temp = *scl_new;								// Essendo stati costretti a passare un puntatore,
+																// l'indirizzo puntato dal puntatore scl fuori dalla
+																// funzione (ovvero quello che rimanda al nodo
+																// successivo) si trova nel puntato da scl_new.
+		*scl_new = (TipoNodoSCL*) malloc(sizeof(TipoNodoSCL));	// Ed è proprio su questo indirizzo che va assegnato
+																// il nuovo nodo (step 1 e 2 eseguiti in simultanea).
+		(*scl_new)->info = e;
+		(*scl_new)->next = temp;
+	}
+
+Nel main:
+
+	TipoSCL scl = NULL;
+	addSCL(&scl, 3);		// NB: passare scl senza & sarebbe anzitutto un'incoerenza di tipo, ma oltre a questo
+	addSCL(&scl, 2);		// la variabile passata NON viene modificata (contrariamente rispetto al suo puntato).
+	addSCL(&scl, 1);		// Questo codice crea tre nodi contenenti nell'ordine i valori 1, 2, 3.
+
+	scl->next->next->info  	// Accede al valore 3.
+
+La cancellazione del primo elemento è del tutto analogo al suo inserimento.
+
+	void delSCL(TipoSCL *scl_to_delete) 			// Come prima, passo il puntatore al puntatore perché devo
+													// modificarlo (in questo caso cancellarlo).
+	{
+		TipoSCL temp = *scl_to_delete;				// Copio l'indirizzo della SCL di cui cancellare il primo
+													// elemento (non posso liberarlo subito, mi perderei il resto
+													// della SCL).
+		*scl_to_delete = (*scl_to_delete)->next;	// Assegno come nuovo indirizzo di partenza quello contenuto nel
+													// campo next del secondo elemento.
+		free(temp);									// A questo punto libero il primo elemento.
+	}
+
+
+OPERAZIONI CHE NON MODIFICANO LA STRUTTURA DELLA SCL
+Per definizione, le SCL si prestano a una formulazione ricorsiva. Nel caso di strutture NON LINEARI, è l'unica via
+percorribile (il metodo iterativo NON FUNZIONA).
+Se devo leggere gli elementi di una SCL lo schema ricorsivo è del tipo
+
+	if(SCL vuota)
+	{
+		passo base;
+	}
+	else
+	{
+		elaborazione primo elemento della SCL;
+		chiamata ricorsiva sul resto della SCL;
+	}
+
+Se invece devo creare o scrivere su una SCL avrò
+
+	leggi dato
+	if (dato valido) 
+	{
+		inserimento del dato nella SCL;
+		chiamata ricorsiva sui dati rimanenti;		// p = p->next;
+	}
+
+Si noti che le funzioni che non modificano la struttura della SCL hanno come parametro TipoSCL (senza *: non ho
+bisogno di modificare un indirizzo di un puntatore).
+
+Nelle dispense seguono svariati esempi utili ma che probabilimente scriverò meglio nella prossima esercitazione.
+
+OPERAZIONI CHE NON MODIFICANO LA STRUTTURA DELLA SCL (262)
+
+Vabbè in pratica tolti i concetti iniziali è tutto esercizio, vedi Esercitazione 7.
+
+Esistono anche le versioni iterative, tendenzialmente con il while. Cambia poco.
+Si usa usa la tecnica del nodo generatore: si aggiunge un nodo in posizione iniziale in modo da poter trattare
+tutti gli elementi della SCL allo stesso modo. Viene rimosso prima di restituire il risultato.
+
+	void creaSCL(TipoSCL *scl, int n, TipoInfoSCL e)
+	{
+		TipoSCL prec; 										// Puntatore a elemento precedente
+		prec = (TipoNodoSCL*) malloc(sizeof(TipoNodoSCL));	// Creazione del nodo generatore
+		*scl = prec;
+		while(n > 0)										// Scansione e copia della lista
+		{
+			prec->next = (TipoNodoSCL*) malloc(sizeof(TipoNodoSCL));
+			prec = prec->next;
+			prec->info = e;
+			n--;
+		}
+		prec->next = NULL; 									// Chiusura della SCL
+		prec = *scl;										// Eliminazione del nodo generatore
+		*scl = (*scl)->next;
+		free(prec);							
+	}

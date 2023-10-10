@@ -1,0 +1,139 @@
+Molti algoritmi hanno un'espressione più semplice (seppure forse più dispendiosa) con la ricorsione.
+Si tratta di chiamate successive alla stessa funzione, che costruiscono una pila di RDA successivi, che vengono
+risolti in ordine inverso rispetto all'ordine di chiamata. Prendiamo come esempio il fattoriale.
+
+	int fattoriale (int n)
+	{
+		if (n == 0)	return 1;
+		else return n*fattoriale(n-1);		// Nel valutare il return richiamo la funzione fattoriale
+	}
+
+Questa classe particolarmente semplice di algoritmi di ricorsione (in cui la chiamata ricorsiva è l'ultima
+istruzione eseguita all'interno della funzione) è detta TAIL RECURSION, ed esistono compilatori in grado di
+ottimizzarne l'esecuzione interna (agendo sui RDA?). Posto che ogni algoritmo iterativo su programmazione
+imperativa può essere riscritto come algoritmo ricorsivo su programmazione funzionale, la ricorsione ha
+naturalmente pro e contro:
+
+	- Tipicamente, una soluzione ricorsiva snellisce il codice rispetto alla controparte iterativa;
+
+	- Può permettere di risolvere problemi che risulterebbero impossibili o molto complessi altrimenti;
+
+	- Non è detto, in generale, che la soluzione ricorsiva di un dato problema sia più conveniente (in termini di
+		tempo, memoria o risorse) della soluzione iterativa con il while;
+
+	- Come nelle soluzioni iterative, c'è sempre il rischio che la ricorsione non termini. Chiedendo il fattoriale
+		di -1 nell'esempio sopra, la ricorsione non termina se non con uno stack overflow.
+
+Nelle dispense di sono un tot di esempi di ricorsione interessanti fino a un certo punto.
+In generale la ricorsione è strutturata nel seguente modo:
+
+	- Passo base, ovvero il caso semplice in cui non serve ricorsione. Nell'esempio del fattoriale, return 1;
+
+	- Passo ricorsivo, ovvero il caso meno semplice in cui la funzione deve richiamare se stessa. Nell'esempio
+		del fattoriale, return n*fattoriale(n-1);
+
+	- Il passo ricorsivo deve portare al passo base perché la ricorsione termini. Nell'esempio del fattoriale,
+		la terminazione è garantita dal fatto che il passo ricorsivo diminuisce di uno il valore passato come
+		parametro: se parto da n > 0 arriverò ad n == 0, ovvero al passo base.
+
+Su tipi indicizzati (stringhe, file di testo, ...) lo schema di lettura ricorsiva è di tipo
+
+	if (dato non valido) {passo base;}
+	else
+	{
+		leggi un elemento;
+		elabora elemento letto;
+		chiama ricorsivamente lettura sui dati rimanenti;
+	}
+
+Un esempio in cui la ricorsione rende l'algoritmo più snello è la copia di un testo nell'ordine inverso. Questo
+problema non ha una soluzione semplice di tipo iterativo, in quanto il cursore del file si sposta solo in avanti.
+
+	void copiaInversa (FILE *i, FILE *o)
+	{
+		char x;
+		x = fgetc(i);
+		if(x != EOF)
+		{
+			copiaInversa(i, o);
+			fputc(x, o);
+		}
+	}
+
+Cosa fa questo codice?
+
+	- Inizia a leggere il file. x non sarà subito EOF, per cui entra nell'if;
+
+	- L'if richiama subito la funzione. Se il file non è terminato, nella nuova chiamata della funzione il codice
+		rientra nell'if e richiama nuovamente la funzione;
+
+	- Questo schema va avanti accumulando RDA successivi, ognuno contenente nella sua variabile x un singolo
+		carattere del file di input;
+
+	- Quando la lettura raggiunge EOF, il codice non entra nell'if, non richiama la funzione e non scrive
+		alcun carattere EOF;
+
+	- La funzione in cima alla pila dello stack è quindi terminata. Si scende al RDA precedente;
+
+	- In ogni RDA precedente la funzione è già entrata nell'if, quindi per terminare deve solo stampare la x
+		corrispondente;
+
+	- A cascata, vengono stampati tutti i caratteri in ordine inverso rispetto a quello di lettura.
+
+
+
+ALCUNI SCHEMI STANDARD DI RICORSIONE
+
+CONTEGGIO DI ELEMENTI (int): esempio, caratteri in un file. Il dato vuoto (nessun carattere) è EOF.
+
+	if(dato vuoto) return 0;
+	else return 1 + chiamata ricorsiva;
+
+CONTEGGIO CONDIZIONATO (int): esempio, aratteri maiuscoli in un file. Condizione = "è maiuscolo".
+
+	if(dato vuoto) return 0;
+	else if (condizione) return 1 + chiamata ricorsiva;
+	else return chiamata ricorsiva;
+
+ACCUMULAZIONE (int): esempio, somma o prodotto degli elementi di un array.  
+
+	if (dato vuoto)
+	return elemento-neutro;							// 0 per la somma, 1 per il prodotto
+	else
+	return primo-elemento + chiamata ricorsiva;  	// analogo * per il prodotto
+
+ESEMPIO INTERESSANTE - RICERCA DEL MASSIMO
+
+	int massimo(FILE *i)
+	{
+		int v;
+		int finefile;
+		finefile = fscanf(i, "%d", &v);
+		if(finefile == EOF) return 0;
+		else
+		{
+			int m = massimo(i);
+			return (m > v) ? m:v; 					// Equivalente a if(m > v) return m;
+		}											// else return v;
+
+	// Notare che si può fare anche in tail recursion, ma devo passare il massimo come parametro!
+
+
+RICORSIONE MULTIPLA
+Possono esserci più chiamate ricorsive nella stessa funzione. Ne è un esempio Fibonacci.
+
+	int fibonacci (int n)
+	{
+		if(n < 0) return -1; 	// In realtà sarebbe meglio effettuare questo tipo di controlli
+								// fuori dalla funzione ricorsiva (non serve farlo a ogni chiamata).
+								// In generale, il "nucleo ricorsivo" contenente le istruzioni essenziali
+								// può essere una funzione interna della funzione complessiva.
+
+		if(n == 0) return 0;
+		else if (n == 1) return 1;
+		else return fibonacci(n-1) + fibonacci(n-2); 	// Doppia ricorsione
+	}
+
+Intuitivamente, questa soluzione per Fibonacci non è la più efficiente (dato che chiama 2^n ricorsioni).
+Altro esempio è quello delle Torri di Hanoi (vedi hanoi.c).
+Altro esempio è quello dell'attraversamento di una palude (vedi palude.c).

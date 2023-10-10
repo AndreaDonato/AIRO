@@ -1,0 +1,124 @@
+Come funzionano i condition code in IA32? Viene usato il REGISTRO DEI FLAG, chiamato EFLAGS.
+Non viene mai manipolato direttamente dal programmatore, ma dalle istruzioni. Ci sono 4 bit principali coinvolti:
+
+	- ZF: zero, messo a uno se il risultato dell'operazione è zero;
+	- SF: sign, messo a uno se il risultato dell'operazione è negativo;
+	- OF: overflow, messo a uno se sono andato in overflow con l'operazione;
+	- CF: carry, messo a uno se c'è riporto.
+
+Cosa fa l'istruzione compare? cmp S, D fa D-S, come la sottrazione ma non modifica D, ma fa side-effect su ZF. A questo punto i test Jcc corrispondono a
+
+	e <--> ZF = 1
+	ne <-> ZF = 0
+	be <-> CF = 1 OPPURE OF = 1, quindi a <--> CF = OF = 0
+
+ATTENZIONE!!
+Se voglio testare n (salvato in eax) > 4 devo scrivere
+
+	cmpl $4, %eax
+	Jg 
+
+CICLI - DO WHILE
+
+	int a = 0;
+	while(a<10) a++;
+
+riformuliamo senza while, ma con if e goto.
+
+	int a=0;
+
+	F: if(a>=10) goto E
+	a++;
+	goto F;
+	E: ...
+
+tradotto in Assembly:
+
+	movl $0, %eax
+	L: cmpl $10, %eax
+	Jge E
+	incl %eax
+	jmp L
+	E: ...
+
+Per debuggare posso eseguire gdb ./somma a patto di averlo compilato con l'opzione -g.
+
+IMPORTANTE!!!!!!!!
+In x86_64 le variabili a funzione NON vengono passate come in x86_32.
+In particolare, i primi 6 parametri vengono automaticamente salvati nei registri, in ordine, DI, SI, D, C, 8 e 9.
+Dopodiché, dal settimo parametro in poi, si passa al modo classico di passare i parametri, nella variante 64bit: 8(%rsp) per il primo,
+16(%rsp) per il secondo, ecc...
+
+Come l'ho scoperto? NoN cIeLo DiCoNo!!!11!1 (su internet). Quindi usare gdb e scrivere
+
+	gdb ./eseguibile
+	layout reg 			// ti fa vedere i registri
+	start
+	s  					// a spam, va avanti
+
+Nel farlo è stato molto utile tmux (grazie ad Ale).
+
+https://docs.oracle.com/it/learn/oracle-linux-tmux/#manage-terminal-window-panes
+
+INTEGER PROMOTION: in C, le variabili più corte di int vengono "promosse" a int. Se passo uno short, viene passato come int.
+	Se il numero è positivo viene esteso con tutti zeri, se è negativo tutti uno (ricordiamo che -1 in binario è rappresentato come 111111111).
+
+WORD SIZE: numero di bit che possono essere manipolati da una singola operazione macchina
+Definisce anche la memoria massima (indirizzi). A 32bit ho massimo 4Gb. A 64bit oltre 16Tb.
+
+PUNTATORI.
+Se scrivo in C
+
+	int *p;
+	*(p+1) = 0;
+
+quel p+1 è un avanzamento di sizeof(int) byte, ovvero 4. Questa cosa di passare direttamente all'OGGETTO successivo piuttosto che al byte successivo.
+Questa finezza in assembly non esiste. Ogni tipo puntatore (int*, char*, ...) è DoubleWord (in 32bit) e QWord in 64. Sia il PC che ESP sono puntatori.
+
+	void azzera(int* p)
+	{
+		*p = 0;
+	}
+
+diventa
+
+	movl 4(%esp), %eax
+	movl $0, 0(%eax)			// Lo spiazzamento zero si può sottintendere
+	ret
+
+oppure versione 64bit
+
+	movl $0, (%rdi)
+	ret
+
+Se invece avessi p[1] = 0? Avrei solo spiazzamento. E se fosse p[n]? Nella scrittura 4(%reg) il numero è un immediato. Allora introduco la scrittura
+
+	(base, indice, scala) ==> M[R[base] + scala*R[indice]]
+
+dove scala = {1, 2, 4, 8, ...} e base, indice sono registri general-purpose. Scala è praticamente sizeof.
+
+	void azzera(int *p, int i)
+	{
+		p[i] = 0;
+	}
+
+base = p, indice = i, scala = 4. Faccio direttamente 64bit pregando Dio che non cambi formato con l'architettura.
+
+	movl $0, (%rdi, %rsi, 4)
+	ret
+
+La promozione a intero funziona solo col parametro passato, NON con la memoria puntata!
+
+	void azzera(short *p, int i)
+	{
+		p[i] = 0;
+	}
+
+	movw $0, (%rdi, %rsi, 2)			// Fosse stato char: scala = 1 e movb
+	ret
+
+Ricorda che rax, eax, ax, al in ordine decrescente. la compatibilità è
+
+	movl eax
+	movw ax
+	movd al

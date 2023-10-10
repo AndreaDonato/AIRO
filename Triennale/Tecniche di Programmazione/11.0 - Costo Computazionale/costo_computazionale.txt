@@ -1,0 +1,172 @@
+Si può valutare e ottimizzare il costo computazionale su diversi fattori, come tempo,
+memoria, traffico su una rete e altri. Qui ci si focalizza sul tempo.
+Non è funzionale considerare il tempo di clock della CPU, in quanto dipendente dalle 
+diverse macchine o compilatori che eseguono o traducono lo stesso algoritmo.
+Ci si riduce allo studio di comportamenti asintotici (per input grande) nelle condizioni
+più sfavorevoli (in cui l'input richiede il maggior numero di operazioni, ad esempio fa
+svolgere il ramo più lungo di tutte le istruzioni condizionali). A questo punto definiamo
+dei costi standard per le varie istruzioni.
+
+	- Ogni operazione o confronto su dati primitivi ha costo costante (O(1), nonostante in
+		realtà, ad esempio, una moltiplicazione è più impegnativa di un'addizione a livello
+		di CPU);
+
+	- Ogni blocco ha come costo la somma dei costi delle singole istruzioni contenutevi;
+
+	- Un'istruzione condizionale ha sempre il costo di valutazione della condizione, e
+		successivamente si valuta il costo del ramo eseguito;
+
+	- Un'istruzione di ciclo ha i costi costanti di inizializzazione, più quelli che dipendono
+		del numero di esecuzioni (confronto per verificare il proseguimento o meno del ciclo e
+		istruzioni interne al ciclo, entrambi moltiplicati per il numero di cicli). Riassumendo,
+		è di tipo c1 + N(c2 + c3) + c4, dove c1 è l'inizializzazione, c2 e c3 verifica della
+		condizione e operazioni interne e c4 eventuali operazioni una tantum di fine ciclo;
+
+	- Una funzione ha costo pari alle istruzioni in essa contenute, ignorando l'allocazione del
+		RDA e delle variabili.
+
+Visto l'interesse asintotico e la conseguente notazione O-Grande, è spesso possibile individuare
+una (o più) operazioni dominanti e contare quante volte viene eseguita per ottenere il costo.
+
+
+ALGORITMI DI RICERCA
+Un modo naive di implementare la ricerca di un elemento in una collezione è quello SEQUENZIALE.
+Si scorre cioè la collezione confrontando ogni elemento con quello da cercare.
+
+	bool ricercaSequenziale(int *a, int n, int k)
+	{
+		bool r = false;
+		for(int i = 0; i <N && !r; i++) r = r || (a[i] == k);
+		return r;
+	}
+
+Le istruzioni eseguite N volte sono:
+
+	- i <N && !r;
+	- a[i] == k;
+	- i++.
+
+Il costo è quindi O(N). Ma è possibile avere un algoritmo di costo inferiore al lineare?
+Se la COLLEZIONE in cui cercare è ORDINATA, si può implementare la RICERCA BINARIA.
+Si basa in pratica su un algoritmo di bisezione, in cui a ogni iterazione scarto metà collezione.
+Implementazione sulle dispense. Il costo è O(log(N)).
+In generale, l'ordinamento rende le operazioni più efficienti.
+
+
+ALGORITMI DI ORDINAMENTO
+
+	- Il SELECTION SORT non lo scrivo neanche, è O(N^2) in qualunque caso;
+
+	- Il BUBBLE SORT si basa sulla seguente proprietà: se tutte le coppie di elementi adiacenti sono
+		ordinate, allora tutta la sequenza è ordinata. Anche lui è O(N^2), ma solo nel caso peggiore
+		(ovvero nel caso in cui la collezione sia in ordine inverso a quello voluto). Il caso
+		migliore è O(N), ma è quello in cui la collezione è già ordinata. Mediamente va un po' meglio
+		del Selection;
+	
+	- Il MERGE SORT restituisce una collezione ordinata a partire da due collezioni ordinate in tempo
+		in O(N). Ma allora come lo applico a un singolo vettore? Con la ricorsione.
+		Ma andiamo con ordine. L'implementazione complessiva richiede tre funzioni. Partiamo da quella
+		che esegue il Merge per come appena definito.
+
+			void merge(int* v, int inf, int med, int sup)	// Unico vettore v di input, da cui si ricavano i
+			{												// due vettori per il Merge tra gli indici inf e sup;
+				int i1 = inf;								// Indice per scorrere sul primo vettore;
+				int i2 = med +1;							// Indice per scorrere sul secondo vettore;
+				// Serve un vettore ausiliario in cui salvare l'ordine, verrà poi copiato sull'originale;
+				int m = sup - inf + 1;						// Lunghezza del tratto di vettore da ordinare;
+				int a[m]; 									// Array ausiliario;
+				int i = 0;									// Indice del vettore di supporto;
+				
+				while((i1 <= med) && (i2 <= sup))			// Finché entrambi i vettori contengono elementi...
+				{
+					if (v[i1] <= v[i2])						// ... se l'elemento del primo vettore è minore
+					{										// dell'elemento del secondo...
+						a[i] = v[i1];						// ... salvalo nel nuovo vettore, ...
+						i1++;								// ... passa al prossimo elemento del primo vettore...
+						i++;								// ... e al prossimo elemento del vettore finale.
+					}
+					else									// ... stessa cosa del ramo if, ma al contrario.
+					{
+						a[i] = v[i2];
+						i2++;
+						i++;
+					}
+				}
+
+				if(i2 > sup) 								// Se è finito il secondo vettore...
+				{
+					for(int k = i1; k <= med; k++)			// ... copia tutti i rimanenti del primo.
+					{
+						a[i] = v[k];
+						i++;
+					}
+				}
+				else										// Viceversa, se è finito il primo...
+				{
+					for (int k = i2; k <= sup; k++)			// ... copia tutti i rimanenti del secondo.
+					{
+						a[i] = v[k];
+						i++;
+					}
+				}
+				
+				for(int k = 0; k < m; k++)					// Copia il vettore di appoggio in quello di partenza.
+					v[inf + k] = a[k];
+			}
+
+		Per usarla su un generico vettore di lunghezza N non mi basta chiamare questa funzione come
+
+			merge(v, 0, (N-1)/2, N-1);
+
+		perché in generale i due sottovettori non sono ordinati. Posso però dividere ulteriormente questi ultimi due
+		sottovettori. Questo risolve le cose? In realtà sì, perché continuando a dividere a un certo punto arriverò a
+		sottovettori di lunghezza 1, già ordinati per definizione. Quindi, finché la lunghezza del vettore non è zero
+		(ovvero inf != sup, o meglio ancora inf < sup) posso dividere in due sottovettori, ordinarli (dove per
+		ordinarli si intende che se inf < sup posso ancora dividere in due sottovettori, ordinarli (dove per ordinarli
+		si intende...... )) e usare merge.
+
+			void mergeSort_r(int* v, int inf, int sup)		// Funzione ricorsiva per dividere i sottovettori fino ad
+			{												// arrivare alla lunghezza 1 (già ordinati).
+				if(inf < sup)								// Entro nel corpo solo se la lunghezza del vettore è > 0
+				{
+					int med = (inf + sup)/2;				// Definisco il punto medio del vettore in input
+					mergeSort_r(v, inf, med);				// Richiamo la funzione per il sottovettore sinistro
+					mergeSort_r(v, med+1, sup);				// Richiamo la funzione per il sottovettore destro
+					merge(v, inf, med, sup);				// Merge Sort tra i sottovettori sinistro e destro
+				}											// Implicito: l'else è il passo base (se la lunghezza del
+			}												// vettore di input è zero non faccio niente).
+
+		A questo punto manca solo la funzione che fa partire la ricorsione.
+
+			void mergeSort(int* v, int n)
+			{
+				mergeSort_r(v, 0, n-1);
+			}
+
+		Che costo ha questo algoritmo? Ogni chiamata di merge porta a un contributo di ordine N, mentre le chiamate
+		ricorsive di mergeSort_r non hanno costo. Alla k-esima ricorsione i vettori avranno dimensione N/2^k, e si
+		andrà avanti finché la lunghezza sarà maggiore di 1, ovvero N/2^k >= 2. Quindi ci saranno al più O(log(N))
+		attivazioni. Segue che il costo complessivo è O(Nlog(N)) (quasi-lineare).
+
+	- Il QUICK SORT seglie un elemento (PIVOT) e controlla quanti elementi sono maggiori o minori di esso.
+		In questo modo sa in che posizione metterlo, e il problema si riduce all'ordinamento dei due sottovettori
+		a sinistra e a destra del pivot. Si ripete quindi l'algoritmo ricorsivamente. Nel caso migliore, il pivot
+		divide sempre il vettore in due (come nel Merge, ma col vantaggio di usare meno memoria) ed il costo è
+		O(Nlog(N)). Nel caso peggiore, il pivot finisce sempre all'inizio o alla fine, rendendo l'algoritmo una
+		specie di Selection Sort di O(N^2). Conviene rispetto al Merge nel caso di vettore mediamente disordinato.
+
+Se è vero che determinate operazioni hanno un costo minore se svolte su collezioni ordinate, ci si può chiedere se
+ha senso ordinare la collezione prima di eseguirle. Ad esempio, se senza ordine il costo dell'operazione è O(N^2) e
+con l'ordinamento è O(N), un Merge Sort di O(Nlog(N)) migliora il costo computazionale. Non avrebbe senso, invece, 
+usare Merge Sort per poi applicare la Ricerca Binaria al posto della Sequenziale (il costo complessivo Merge+Binaria è
+O(Nlog(N)) + O(log(N)) = O(Nlog(N)) contro O(N) della sola Sequenziale sulla collezione non ordinata). Questo poi dipende
+dai casi: se devo effettuare un gran numero di ricerche può aver senso ordinare i dati e usare la Binaria.
+
+
+ESEMPI: APPLICAZIONI SU ARRAY ED SCL
+L'inserimento di un elemento in un array ha sempre costo N. Questo perché anche se avviene in posizione 0 bisogna
+comunque traslare tutti gli altri elementi. Per una SCL è vero che nel caso peggiore il costo è O(N), ma è anche vero
+che mediamente sarà più basso. Per la ricerca, notiamo che nella Binaria vi sono operazioni di tipo (a[i]== k).
+Questa è un'operazione di O(1) solo se a è un vettore. Se fosse una SCL, non avrei modo di accedere in modo semplice
+all'elemento i-esimo, motivo per cui non sarebbe più vero che le operazioni interne al ciclo while sono di O(1).
+In una SCL, anche se ordinata, non posso avere ricerca di ordine log(N).

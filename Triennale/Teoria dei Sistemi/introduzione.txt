@@ -1,0 +1,99 @@
+L'automatica è "l'intelligenza" dentro gli oggetti, ovvero la metodologia per far fare agli oggetti le cose da soli.
+Lo schema è INPUT -> BLACKBOX -> OUTPUT. Prendiamo come esempio VELOCITÀ DESIDERATA -> BLACKBOX -> VELOCITA' TRENO.
+L'interno della BB può essere visto quantomeno come diviso in una "scatola treno" (ovvero il PROCESSO) e una del CONTROLLORE,
+che può essere banalmente un umano. Per andare alla velocità desiderata, l'umano deve sapere a quanto va il treno, quindi
+ricevere informazione dalla box del processo. Ma ci sono anche fattori esterni, quindi un input più complesso che influenza il
+processo. Se questa info arriva al controllore, può attuare strategie per migliorare il suo controllo. Diamo un pò di nomi.
+
+	- Definisco INGRESSO MANIPOLABILE l'input che controllo u(t) [Lo conosco];
+	
+	- Definisco USCITA l'output y(t), per ipotesi misurabile [E' ciò che mi interessa misurare].
+		
+		- Se considero in uscita più informazioni di quelle che mi servono, lo chiamo m(t) [Dipende dai sensori che uso];
+
+	- Definisco DISTURBO l'input che non controllo z(t) [So di che si tratta].
+
+	- Definisco STATO del sistema le informazioni della box che non misuro x(t) [Questo chi è??];
+
+
+Si noti che le box di controllore e processo hanno lo stesso schema della box complessiva. In generale, ogni volta che vado
+più in dettaglio trovo sempre lo stesso schema. Quindi individuo la box come elemento fondamentale. Come la descrivo?
+Intanto la chiamo SISTEMA, e rappresenta il legame funzionale di y(t) e u(t). E chiaramente da x(t).
+
+	Se u(t) è una persona che spinge un bambino sull'altalena e y(t) è la posizione raggiunta in seguito alla spinta, è
+	chiaro che dipende anche dal pregresso movimento (o meno) dell'altalena, ovvero dallo stato x(t).
+
+Lo stato x(t) tiene conto di quello che è successo prima. Un sistema la cui uscita dipende da x(t) è detto SISTEMA DINAMICO.
+
+	Esempio: massa M attaccata a molla k, smorzante secondo velocità di coefficiente b e forzante F. Scrivo la differenziale
+
+		M d_t^2(p(t)) = -kp(t) - b d_t(p(t)) + F(t)
+
+	in cui abbiamo
+
+		u(t) = F(t);
+		y(t) = p(t);
+		x(t) = (p(t), d_t(p(t))) = (x1(t), x2(t)) [vettoriale!].
+
+	Quindi posso riscrivere la differenziale al primo ordine mettendo a sistema
+
+		M d_t(x2(t)) = -kx1(t) - bx2(t) + u(t)
+		y(t) = p(t) = x1(t)
+		d_t(x1(t)) = x2(t)
+
+	Tre equazioni differenziali lineari in un sistema (in senso matematico) lineare. Tutto il sistema è quindi lineare.
+	Posso allora riscrivere in forma maticiale
+
+	dx	= | dt(x1)| = |0        1| |x1(t)| + |0| u(t)
+	dt    | dt(x2)|	  |-k/M  -b/M| |x2(t)|   |1|
+
+	Devo prendere appunti cartacei mi sa.
+	Segue altro esempio analogo con circuito RLC. 
+
+Il punto è che si arriva sempre a un sistema lineare del tipo
+
+	dt(x(t) = A x(t) + B u(t)
+	y(t) = C x(t) + D u(t)
+
+
+
+
+
+
+
+
+Ovviamente i coefficienti matriciali A, B, C possono dipendere dal tempo.
+Se conosco la soluzione di questo problema generale, so risolvere i problemi lineari.
+Situazione analoga per i problemi discreti e le equazioni alle differenze. In generale:
+
+	D x(t) 	= f(t, x(t), u(t), z(t))
+	y(t) 	= g(t, x(t), u(t), z(t))
+	m(t) 	= h(t, x(t), u(t), z(t))
+
+In prima analisi si ignorano le distinzioni date da m(t) e z(t): è solo input/output. Poi mi interesserà in un secondo momento.
+
+	D x(t) 	= f(t, x(t), u(t))
+	y(t) 	= g(t, x(t), u(t))
+
+Consideriamo sistemi stazionari (e per estensione quasi-stazionari, vedi CdL in fisica) e lineari:
+
+	D x(t) 	= f(x(t), u(t)) = A x(t) + B u(t)
+	y(t) 	= g(x(t), u(t)) = C x(t) + D u(t)
+
+x, y e u passano da essere elementi di un insieme generico a elementi di uno spazio lineare.
+	
+	x \in R^n
+	y \in R^q
+	u \in R^p
+
+Quindi le matrici sono
+
+	A > nxn
+	B > nxp
+	C > qxn
+	D > qxp
+
+Queste ipotesi tagliano fuori troppi fenomeni? No. E anche se fosse, si approssima intorno all'equilibrio.
+
+L II 28/09 m 44
+Copia tutto su carta.
