@@ -1,0 +1,74 @@
+Gli AUTOMI A STATI FINITI (ASF o FSA in inglese) sono formulazioni equivalenti alle RegEx.
+C'è un teorema che dimostra ciò ma la mia fonte si limita a citarlo.
+Sono schemi logici strutturati nel seguente modo:
+
+	- STATI, rappresentati graficamente come cerchi, in cui l'ASF si può trovare;
+	
+	- ARCHI, rappresentati graficamente come frecce, che collegano gli stati;
+	
+	- ETICHETTE che specificano l'input che attiva un determinato arco.
+
+Il principio di funzionamento è il seguente:
+
+	- L'ASF parte in uno stato iniziale;
+	
+	- Se e solo se viene fornito un input corrispondente all'etichetta di un arco che parte dallo stato iniziale si muove lungo quell'arco e finisce in un nuovo stato;
+
+	- In tutti gli altri casi l'input viene rifiutato (oppure l'eventuale verifica in corso ha esito negativo);
+
+		- Si potrebbe per completezza includere uno stato-trappola in cui finiscono tutti gli input non validi, dal quale non si pùò uscire.
+
+	- Gli stati finali indicano dove l'ASF deve smettere di ricevere input;
+
+	- Nel caso l'input non si fermi esattamente su uno stato finale, la verifica dell'input complessivo ha esito negativo.
+
+L'idea è che essere in uno stato non richiede la conoscenza di come ci si è arrivati, ma si assume che non ci siano errori fino a quel punto.
+
+Possiamo vederlo in senso insiemistico, con l'insieme degli input I e quello degli stati S. La funzione che sposta lo stato dell'automa è del tipo
+
+	f: SxI -> S, ovvero f(stato, input) = stato.
+
+Lo spostamento tra gli stati si può vedere come funzioni f annidate. Riassumendo, quindi, un ASF è una quintupla
+
+	<I, S, s_0, f, A>
+
+dove s_0 è lo stato iniziale e A è l'insieme degli stati finali (sottoinsieme di S).
+E' possibile progettare un ASF con porte logiche.
+
+
+AUTOMI NON DETERMINISTICI
+A un dato input non corrisponde necessariamente un solo arco, l'automa va contemporaneamente in tutti gli stati indicati dagli archi.
+Come regola, è sufficiente che si arrivi in almeno uno stato finale per accettare l'input complessivo. Rispetto al caso precedente, f va nell'insieme dei possibili
+stati piuttosto che in un singolo stato. Il vantaggio è il calcolo parallelo, e quindi il poter dire una cosa del tipo "esiste una sequenza di scelte che porta
+a una soluzione, quindi una soluzione esiste". Chiaramente non è possibile scrivere direttamente un codice non deterministico, ma ci sono metodi (che sfruttano gli
+automi) in grado di tradurre istruzioni deterministiche in esecuzioni non deterministiche (credo di aver capito questo). Si possono quindi simulare processi
+non deterministici con processi deterministici (quantum computing...?). Semplifica determinati algoritmi.
+
+	Teoremino (qui non dimostrato) dato un automa non deterministico esiste sempre un automa deterministico equivalente.
+
+AUTOMI CON USCITE
+In corrispondenza dello stato finale c'è un output. Esempio: Macchinetta del caffè che accetta monete da 5 e 10 cent ed eroga caffè a 15 cent. Lo schema è
+
+	0/0 - Stato di partenza. Non ho inserito nulla e non ho output
+
+		- Input 5cent: mi sposto allo stato 1/0;
+		- Input 10cent: mi sposto allo stato 2/0.
+
+	1/0 - Ho inserito 5cent. Non ho output.
+
+		- Input 5cent: mi sposto allo stato 2/0;
+		- Input 10cent: mi sposto allo stato 3/C.
+
+	2/0 - Ho inserito 10cent. Non ho output.
+
+		- Input 5cent: mi sposto allo stato 3/C;
+		- Input 10cent: mi sposto allo stato 4/R.
+
+
+	3/C - Stato finale. Ho inserito 15cent. Erogo il caffè.
+
+		- Non accetto ulteriori input.
+
+	4/R - Stato finale. Ho inserito 20cent. Erogo il caffè e 5cent di resto.
+
+		- Non accetto ulteriori input.

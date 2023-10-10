@@ -1,0 +1,130 @@
+Mentre Python è un linguaggio interpretato (ogni riga viene tradotta a runtime), C è un linguaggio
+compilato (tutto il programma viene tradotto prima del runtime).
+In Python ogni variabile è di tipo riferimento a oggetto (classi int, str, float, dict, ...), in C a
+ogni tipo di variabile si assegna un determinato spazio in memoria.
+Il C è molto più soggetto ad errori di approssimazione per via della precisione del calcolatore.
+Un'istruzione del tipo a == 0 può produrre sempre falso!
+Nelle espressioni logiche come a && b se a è falsa b non viene valutata. Sempre meglio scrivere prima la
+condizione più facile da verificare.
+
+OPERATORI
+Gli operatori in C si dividono in tre categorie:
+
+	- Operatori Unari: agiscono su un singolo elemento:
+		- Incremento (++);
+		- Decremento (--).
+
+	- Operatori Binari: agiscono su due elementi. Si possono ulteriormente dividere in:
+
+		- Aritmetici, ovvero:
+			- Addizione, Sottrazione (+, -);
+			- Moltiplicazione, Divisione (*, /);
+			- Modulo (resto intero della divisione, %);
+			- Divisione Intera (parte intera della divisione, //).
+
+		- Relazionali, ovvero
+			- Maggiore, Minore (>, <) e variante con l'uguale (>=, <=);
+			- Uguale, Diverso (==, !=).
+
+		- Logici, dove FALSE = 0 e TRUE = qualsiasi altro numero non nullo, ovvero
+			- AND, OR (&&, ||);
+			- NOT (!).					// Che in realtà non è binario, vabb
+
+		- Bitwise, cioè operazioni eseguite a livello di bit, ovvero
+			- AND, OR (&, |);
+			- NOT (~);
+			- SHIFT (>>, <<);
+			- XOR (^).
+
+
+BLOCCO IF - ELSE_IF - ELSE
+Sintassi: if(condizione){} else if(condizione){} else{}. Questa scrittura porta a potenziali ambiguità.
+
+	if(a>0) if(b>0) printf("b positivo"); else printf ("???");
+
+In questo caso a priori non è chiaro a quale if si riferisca l'else. Per convenzione, si riferisce sempre
+all'if più interno. Oppure ovviamente basta usare le graffe.
+
+
+ESPRESSIONE CONDIZIONALE
+In alcuni casi più comodo e compatto di if-else. Sintassi: {{condizione? espressione1 : espressione2}}.
+Semantica: Valuto condizione. Se è vera eseguo espressione1, altrimenti espressione2.
+Esempio: printf ("maggiore = %\n", (a > b)? a : b);
+
+
+BLOCCO SWITCH
+Permette di realizzare una selezione a più vie. Sintassi:
+
+	switch(espressione)
+	{
+		case etichetta-n:{istruzioni-n; break;}
+		default: istruzioni-default
+	}.
+
+Semantica: valuto espressione; cerco la prima corrispondenza del risultato di espressione tra le
+etichette. Quando la trovo, entro nel case, eseguo ed esco dallo switch. Se non la trovo, eseguo default
+ed esco. IMPORTANTE: espressione può essere solo int o char. Ha senso, considerando che dovendo poi fare
+un confronto di tipo == l'approssimazione del tipo float romperebbe tutto; i valori di etichetta devono essere noti a tempo di compilazione. Esempio:
+
+	int i ;
+	...
+	switch (i)
+	{
+		case 0: printf("i vale zero"); break;
+		case 1: printf("i vale uno"); break;
+		case 2: printf("i vale due"); break;
+		default : printf("i è minore di zero o maggiore di due");
+	}
+
+Si possono raggruppare più casi aventi le stesse istruzioni con case 1: case 2: case n: {istruzioni}.
+Si può anche omettere il break, i controlli continueranno fino a trovarne uno.
+
+	int lati ; 				// massimo numero di lati del poligono (al piu’ 6)
+	...
+	printf ("Poligoni con al più %d lati: ", lati);
+	switch (lati)
+	{
+		case 6: printf("esagono, ");
+		case 5: printf("pentagono, ");
+		case 4: printf("rettangolo, ");
+		case 3: printf("triangolo." ) ; break ;
+		case 2: case 1: printf("nessuno."); break;
+		default: printf("\n");
+	}
+
+CICLI
+Un ciclo si implementa con istruzioni di tipo go_to, jump_if, ecc. Ma a livello di Hardware (architettura Von Neumann) come si implementano queste istruzioni?
+Avviene tramite il Program Counter (PC). Se il registro PC contiene un certo indirizzo che rappresenta la prossima istruzione da eseguire, sovrascrivendolo posso "saltare" al nuovo indirizzo.
+In alcuni compilatori, i cicli definiti vengono tradotti nella corrispondente sequenza di istruzioni piuttosto che implementare una struttura con salti a livello di PC (così ottimizza!).
+
+CICLO WHILE
+Come in Python, oltre alla sintassi leggermente diversa. Può risultare in un ciclo definito o indefinito. while(condizione){istruzioni}
+	VARIANTE DO WHILE: La condizione viene controllata alla fine del set di istruzioni: do{istruzioni}while(condizione);}. Le istruzioni vengono eseguite almeno una volta.
+
+CICLO FOR
+Come in Python, oltre alla sintassi leggermente diversa. for(inizializzazione; condizione; incremento). La variabile inizializzata per il ciclo ha come solo campo d'azione il ciclo stesso.
+Si può usare per implementare cicli indefiniti scrivendo for(init;;). Si possono manovrare più variabili nella definizione di for. Esempio che calcola e stampa le prime 10 potenze di 2:
+
+int i , potDi2 ;
+for ( i =0 , potDi2 =1; i < 10; i ++ , potDi2 *= 2)
+printf ( " 2 alla %d = %d \n " , i , potDi2 ) ;
+
+
+INSIEME COMPLETO DI ISTRUZIONI DI CONTROLLO
+Due programmi sono equivalenti se per ogni input producono lo stesso output (compreso il ciclare all'infinito).
+Un insieme di istruzioni di controllo del flusso si dice completo se per ogni programma nel linguaggio ne esiste uno equivalente scritto solo con le strutture di controllo contenute nell’insieme.
+Teorema di Böhm e Jacopini: La sequenza, l’istruzione if-else e l’istruzione while formano un insieme di istruzioni completo.
+
+
+CONTROLLO DEL FLUSSO
+Ci sono comandi speciali di salto. E sono tutti DEPRECATI.
+	- break (DEPRECATO per la leggibilità, meglio usare le VARIABILI DI FLAG): interrompe e salta salta fuori da ciclo;
+	- continue (DEPRECATO, sostituibile da if-else): salta tutte le istruzioni successive del ciclo e rimanda alla verifica della condizione;
+	- go to (DEPRECATO, "da evitare come la peste" -cit., incasina il flusso logico del programma): salta a una determinata etichetta (scritta seguita dai due punti prima di una certa istruzione).
+
+
+ERRORI
+Segmentation Fault: Indica tipicamente che si è usato un indirizzo al di fuori della memoria allocata per il programma. Capita ad esempio se ci si perde un puntatore.
+
+IMPORTANTE
+Per C e C++ i singoli apici '' racchiudono i char, mentre i doppi apici "" le stringhe!!!

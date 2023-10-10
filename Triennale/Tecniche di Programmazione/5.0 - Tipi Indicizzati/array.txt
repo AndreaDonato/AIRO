@@ -1,0 +1,127 @@
+Un array di per sé non ha un tipo primitivo associato: si definisce di TIPO PARAMETRICO.
+Dichiarare un array di N int tramite il comando
+
+	int array[N];
+
+è concettualmente come dichiarare un puntatore a int di tipo
+
+	int *p;
+	p = (int*) malloc(N*sizeof(int));
+
+(con la differenza che questo array è dichiarato in stack, mentre il malloc chiaramente alloca in heap).
+Oltre all'evidente maggiore semplicità di dichiarazione, per leggere o scrivere sulla locazione k la
+sintassi passa da *(p+k) a array[k]. Chiaramente essendo comunque aritmetica di puntatori k deve essere int
+e variare in [0, N-1]. Eventuali valori al di fuori non vengono controllati da C (Python ad esempio lo fa),
+permettendo di accedere a celle di memoria contigue ma non appartenenti all'array (e generando disastri).
+Si può anche inizializzare l'array in fase di dichiarazione:
+
+	int n[] = {1, 3, 2};		EQUIVALENTE A 		int n[3]; n[0] = 1; n[1] = 3; n[2] = 2;
+
+NON SI PUO' fare {int n[]; n = {1, 3, 2};}. In realtà posso trattare n stesso come puntatore (alla
+locazione del primo elemento dell'array), per cui scrivere n[k] è identico a scrivere *(n+k). Interessante
+notare che posso usare la notazione con le parentesi quadre anche per i puntatori. Segue che valgono tutte
+le regole sui puntatori anche per gli array, eccetto una: non posso assegnare un array a un altro puntatore.
+
+	int* g = n;			// LEGIT	: g punta alla locazione del primo elemento di n;
+	n = g;				// NOT LEGIT: non ha concettualmente senso assegnare un array a un puntatore.
+
+La differenza tra puntatori che puntano ad elementi di uno stesso array è pari alla differenza tra gli
+indici degli elementi puntati. Altrimenti, il comportamento della differenza è indefinito.
+
+	int a[4] = {2, 4, 6, 8};
+	int* b = &a[2];
+	int* c = &a[1];		// b-c = 1, c-b = -1;
+
+Nel passaggio a funzione, dichiaro come parametro int n[]. Quando chiamo la funzione, scrivo solo n, inteso
+come puntatore al primo elemento dell'array. Questo significa che:
+
+	- Nelle funzioni posso modificare l'array;
+	
+	- Se dentro la funzione chiamassi {sizeof(n)}, questa restituirebbe 4 (in quanto in questo caso pari a
+		sizeof(int)). Se mi serve la dimensione dell'array dentro la funzione, sono costretto a passarla
+		separatamente usando un altro parametro;
+	
+	- Potrei dichiarare come parametro ad esempio n[3], ma la funzione sarebbe così limitata a gestire
+		unicamente array di lunghezza 3;
+
+Una funzione può restituire un array solo tramite puntatore al suo primo elemento. Ovviamente se definisco
+un array tramite funzione devo farlo in heap. Con un'assegnazione stack runtime del tipo
+
+	int* creaArray() {
+		int risultato[5] = {1, 2, 3};
+		return risultato;
+	}
+
+	int main () {
+		int* a = creaArray();
+	}
+
+la variabile a punta a un indirizzo non allocato (lo era nello stack della funzione, ma si è chiusa!).
+
+	In C non è possibile dichiarare un array senza specificare il numero di elementi. Questo perché le
+	dimensioni del RDA devono essere note a compilazione, tra cui il numero delle variabili statiche
+	(ogni elemento n[k] può essere visto come variabile statica). Vicevarsa, nel C++ e in generale nei
+	linguaggi più evoluti posso farlo, perché gestiscono l'eccezione allocando un'area di memoria di
+	dimensione variabile "al di sopra" del RDA. Per lo stesso motivo, in C non posso dichiarare funzioni
+	con un numero variabile di argomenti. Tutto questo si fa in PROGETTAZIONE DEL COMPILATORE.
+
+
+ARRAY DI ARRAY
+Ovvero, come implementare una matrice in C. Dichiaro la variabile con il doppio puntatore, che sarà da
+intendersi come array i cui elementi sono a loro volta puntatori.
+
+	int n = 10;
+	float** a = calloc(n, sizeof(float*));	// Dichiaro un puntatore a puntatori a float (per ora NULL);
+	for (int i=0; i<n; i++) {				// Ciclo sugli elementi dell'array a;
+	a[i] = calloc(3, sizeof(float));		// Alloco agli elementi i puntatori a float (per ora 0).
+	}
+
+In questo esempio ho creato una matrice n*3. Posso raggiungere ogni elemento con la notazione a[i][j], con
+i in [0, N) e j = {0, 1, 2} o in modo analogo con la notazione dei puntatori:
+
+	a = &a[0]	;	a[0] = *a 	;	a[i] = *(a+i)	;	a[i][j] = *(a+i)+j	.
+
+In memoria heap, la matrice è salvata a blocchi corrispondenti ai valori delle righe.
+Quando voglio rilasciare questa memoria devo farlo in ordine inverso: prima i vettori interni con un ciclo
+for {free(a[i]);}, e solo dopo {free(a);}.
+Posso dichiarare tutto questo in modo statico.
+
+	 int m[3][2]; 		// Dichiara una matrice 3x2;
+
+	 int m[][2] = {		// Dichiara e inizializza una matrice 3x2.
+	 	{3, 5},			   Notare che sono costretto a specificare tra quadre il numero di elementi
+	 	{9, 12},		   per ogni riga.
+	 	{12, 1}
+	 }
+
+Mediante la funzione sizeof() posso ottenere informazioni quali
+
+	- Numero di elementi: 	E = sizeof(m)/sizeof(int);
+	- Numero di colonne:	C = sizeof(m[0])/sizeof(int);
+	- Numero di righe:		R = E/C.
+
+Ad esempio, il prodotto righe per colonne si implementa come
+
+	for(int i=0; i<N; i++)
+	{	
+		for(int j=0; j<N; j++)
+		{
+			C[i][j] = 0;
+			for(int k=0; k<N; k++)
+			{
+			C[i][j] += A[i][k]*B[k][j];
+	}
+
+Se voglio passare una matrice statica come parametro a funzione devo sempre specificare il numero di
+colonne. Storicamente, la ragione è che il compilatore C vuole sapere quanta lunghezza allocare nel
+record di attivazione, ma è stata superata dai linguaggi più moderni.
+Per questo motivo, in C è più comodo allocare le matrici in heap e passare un puntatore doppio.
+ 
+
+VARIE
+Data una matrice r x c, applicare un'operazione di FILTRAGGIO CON KERNEL SOMMATORE significa:
+
+	- Ho un filtro (matrice) di dimenisoni dr x dc;
+	- La matrice filtrata ha dimensioni ceil(r/dr) x ceil(c/dc), ovvero al massimo (dr, dc = 1) le stesse della
+		matrice di partenza e al minimo (dr, dc >> r, c) 1 x 1;
+	-

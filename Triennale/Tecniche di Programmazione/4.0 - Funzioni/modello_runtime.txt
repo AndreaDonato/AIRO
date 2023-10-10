@@ -1,0 +1,34 @@
+Come viene gestita la memoria quando viene eseguito un programma?
+A runtime, il SO gestisce tre aree distinte di memoria:
+
+	- Area del codice eseguibile: La dimensione è fissata in compliazione, la locazione nel momento in cui
+		il SO carica il programma in memoria;
+	
+	- Record di Attivazione: Allocato all'attivazione di una funzione, contiene informazioni sulle
+		locazioni di memoria per:
+		
+		- Parametri formali e variabili locali;
+		- Valore returnato dalla funzione (se non è void);
+		- Indirizzo di ritorno, ovvero prossima istruzione da eseguire nel programma chiamante.
+
+		Viene deallocato al termine dell'esecuzione della funzione;
+
+	- Stack: Struttura "a pila" (LIFO, Last In First Out) riservata ai dati locali delle funzioni, cresce
+		e decresce dinamicamente durante il runtime;
+	
+	- Heap: Memoria allocata dinamicamente, in cui ogni sezione è indipendente dalle altre.
+
+Ogni volta che chiamo una funzione creo il suo record di attivazione (RDA) e lo metto sulla pila.
+E' chiaro che è come aprire tante parentesi: la prima che chiudo è l'ultima che ho aperto. Il modello a pila
+si applica a tutti e soli i linguaggi SEQUENZIALI (in contrasto a quelli CONCORRENTI).
+Se una funzione si autochiama (ricorsione) vengono aggiunti alla pila RDA successivi. In questo modo si
+può esaurire la memoria stack (stack overflow?).
+
+Segue un esempio di evoluzione di pila dei RDA che commenterò sulle dispense (pag 132).
+
+Breve riassuntino di cosa accade quando eseguo RETURN.
+
+	- Passa al PC il valore della prossima istruzione da eseguire;
+	- Alloca la memoria per il valore di ritorno (no, non avviene prima);
+	- Elimina dalla pila il RDA corrente e passa il valore argomento al RDA chiamante;
+	- Il SO esegue il comando del PC.

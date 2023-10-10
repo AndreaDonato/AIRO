@@ -1,0 +1,62 @@
+Nel momento in cui dichiaro delle variabili, il programma assegna a ognuna di esse una porzione di memoria
+dipendente dal tipo della variabile. Questo tipo di allocazione di memoria è detta STATICA, perché è
+definita in fase di compilazione del programma. Leggendo un programma sono in grado a priori di dire quanta
+memoria statica viene utilizzata.
+In contrapposizione è possibile allocare la memoria in modo DINAMICO, ovvero durante l'esecuzione del
+programma. Non è noto a priori quanta memoria viene allocata in modo dinamico, ma dipende dall'esecuzione.
+Essendo modalità molto diverse, ci sono due diverse aree di memoria dedicate:
+
+	- STACK: Struttura a "pila", utilizzata per la memoria STATICA;
+	- HEAP : Utilizzata per la memoria DINAMICA.
+
+Nella libreria <stdlib.h> sono definite le funzioni standard per la gestione dinamica della memoria.
+
+	- malloc(n): alloca n byte contigui di memoria, restituendone l'indirizzo come puntatore void.
+		In questo caso è necessaria un'operazione di cast esplicita:
+
+			char* p = (char*) malloc(sizeof(char));
+
+		Tipicamente si allocano multipli interi della sizeof(tipo_considerato);
+
+	- calloc(n, size): alloca memoria per n elementi di grandezza size e li inizializza a zero. Se il cast
+		è di tipo puntatore, l'inizializzazione è a NULL. Un po' più dispendioso come processo, ma può
+		essere utile;
+
+	- realloc(*p, size): rialloca la memoria di *p precedentemente allocata con malloc, calloc o se stessa,
+		assegnando (potenzialmente in una diversa zona di memoria heap) size byte.
+
+
+	- free(void* p): libera l'area di memoria corrispondente a un puntatore p allocato dinamicamente
+		(se non lo è, il comportamento della funzione è indefinito). Anche dopo l'esecuzione di free(p),
+		il valore di p resta inalterato (punta sempre allo stesso indirizzo, seppur non allocato).
+
+E'possibile accedere facilmente a zone di memoria non allocate, ma queste conterranno valori
+decisi dalle scelte interne del sistema operativo, e quindi di poco interesse per chi programma.
+Questo tipo di puntatori sono detti APPESI (Dangling Pointers):
+
+	int *q = (int*) malloc(sizeof(int));
+	int *p = q;
+	*q = 10;
+	free (p);
+
+Da questo esempio noto che:
+
+	- Nel momento in cui eguaglio q allocato dinamicamente a p generico puntatore posso usare
+		la funzione free() su p;
+	- Dopo la chiamata di free() sia p che q puntano ad un'area di memoria non allocata.
+
+Posso risolvere questa situzione modificando l'indirizzo puntato da p e q, di norma mettendo NULL.
+Notare anche che si può parlare di TEMPO DI VITA di una variabile. In Stack coincide con il tempo di
+esecuzione del blocco in cui è definita, in Heap si determina a runtime. E' possibile che una variabile
+perda il riferimento sulla memoria originariamente allocata.
+
+	void* p = malloc(2);
+	p = malloc(4);
+
+Come risultato p punta a 4 byte diversi dai primi due, i quali restano senza variabili che li puntano.
+Allocando iterativamente memoria dinamica senza mai liberarla è possibile portare la RAM a saturazione.
+Questo perché il C non è dotato di un GARBAGE COLLECTOR, ovvero una speciale funzione eseguita
+periodicamente dal sistema che libera la memoria allocata ma non puntata (e dunque non utilizzata) dal
+programma in esecuzione. Pur sollevando il programmatore dall'onere di pulire la memoria, eseguire questa
+funzione di controllo e pulizia è subottimale rispetto al farlo esplicitamente solo quando serve, motivo per
+cui in C si possono scrivere programmi particolarmente ottimizzati dal punto di vista delle risorse usate.

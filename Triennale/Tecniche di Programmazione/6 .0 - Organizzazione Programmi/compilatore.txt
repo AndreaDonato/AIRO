@@ -1,0 +1,181 @@
+*spiegazione dei file header (.h, librerie)*
+E' possibile "spezzare" le funzioni su tre file:
+
+	- f.h contiene le sole dichiarazioni delle funzioni;
+	- f.c contiene le sole implementazioni delle funzioni (corpo);
+	- main.c contiene la sola funzione main.
+
+Quando compilo un oggetto del genere devo combinare tutti e soli i file .c coinvolti:
+
+	gcc -o test f.c main.c 			// Crea l'eseguibile test
+
+Si può trovare in questi file multipli condivisi l'uso della keyword EXTERN, che permette al compilatore
+di cercare la variabile specificata in un altro file. Analogo della variabile globale dicharata fuori dal
+main. Il suo uso è deprecato.
+
+
+PROCESSO DI COMPILAZIONE 	// https://www.cprogramming.com/tutorial/cpreprocessor.html
+Tutto quello che segue ha generalmente come obiettivo quello di semplificare compilazione e scrittura del
+codice. Il processo di compilazione in C si divide in tre fasi:
+
+	- Preprocessore: Trasforma il programma C con direttive di preprocessamento (#) in un programma C in
+		cui esse sono state eseguite ed eliminate dal codice. E' possibile visualizzare il nuovo listato C
+		con l'opzione -E (es: gcc -E 2nd_step.c source.c). Possono essere:
+
+			- Direttive di inclusione: includono file header e librerie;
+
+			- Definizioni di Costanti e Macro: semplice sostituzione testuale, senza controlli di tipo
+				(#define[idname][value]). E' possibile omettere [value], in ottica di compilazione
+				condizionale (vedere dopo). Esempi possono essere:
+
+					#define pi_plus_one (3.14 + 1)
+					#define BOOL int 				// Permette di usare BOOL come tipo int nel codice
+					#define TRUE 1
+					#define FALSE 0
+					#define BEGIN {					// Permette di sostituire le graffe con BEGIN ed END
+					#define END }
+					#define MAX(x,y) ((x)>(y)?(x):(y))	// MAX(j+k,m-n) diventa ((j+k)>(m-n)?(j+k):(m-n))
+					
+				Vi sono poi macro prefefinite come _DATE_ e _TIME_. E' importante l'uso delle parentesi:
+				essendo una sostituzione testuale, se scrivo 
+
+					#define MULT(x, y) x*y
+					...
+					int z = MULT(3+2, 4+2);				// Mi aspetto 5*6 = 30
+					
+				questo diventa int z = 3+2*4+2, ovvero 13. Se la definizione ha una somma, meglio metterla
+				tra parentesi per lo stesso motivo.
+				Si possono utilizzare le macro per i loro side-effects piuttosto che per ritornare un
+				valore. Il modo migliore di farlo (vedi reference) è il seguente:
+
+					#define SWAP(a, b)  do{a^=b; b^=a; a^=b;} while(0)
+
+				Questa macro implementa uno swap tra due quantità a e b sfruttando lo XOR bit a bit.
+
+
+			- Compilazione condizionale: permettono di selezionare quali pezzi di codice compilare.
+				Particolarmente utile nel caso di grandi quantità di codice o in situazioni in cui si è
+				stretti con la memoria. La struttura è identica a quella dell'IF-ELIF-ELSE.
+
+					#if poco_spazio					// Chiaramente poco_spazio deve essere definita;
+						short a, b;
+					#else
+						int a, b;
+
+				Ci sono anche direttive più sofisticate, come #ifdef e #ifndef (IF (NOT) DEFINED).
+				Permettono di controllare se una direttiva è stata definita o meno, e compilare codice
+				di conseguenza. La fine del codice da compilare è segnata da #endif.
+
+					#ifndef MYMATH_H				// Se non è ancora definito MYMATH_H
+					#define MYMATH_H				// definiscilo così e
+					// *codice //					// compila questo codice
+					#endif							// che termina qui.
+
+				oppure
+
+					#ifndef NULL					// Se non lo è ancora, definisce NULL
+					#define NULL (void*)0
+					#endif // #ifndef NULL			// Può essere utile scrivere cosa termina l'#endif
+
+				#ifndef è molto usato nelle librerie, perché C non ammette definizioni multiple. Se quindi
+				includo la stessa libreria in f.h e in f.c il compilatore troverà oggetti di tipo
+
+					#ifndef _STDIO_H
+					#include <stdio.h>
+					#endif
+
+			- Altre direttive: varie ed eventuali, come #pragma (#pragma once permette di importare un file
+				header una sola volta, ignorando ogni chiamata successiva, oppure #pragma warning (disable 
+				: 4018) disabilita il warning 4018 di signed/unsigned mismatch).
+
+	- Compilazione: il processo di compilazione produce un CODICE OGGETTO scritto in linguaggio macchina.
+		Se ad esempio compilo le funzioni del file f.c con il comando gcc -c f.c otterrò esplicitamente un
+		file f.o contenente il codice oggetto e in generale non ancora eseguibile. Questo perché
+
+			- non è sempre scritto in linguaggio macchina (in C in realtà lo è);
+			- non contiene ancora i moduli esterni necessari all'esecuzione, come le librerie.
+
+		Il codice oggetto è specifico del compilatore e del SO (vedi back-end più avanti), e lo stesso SO
+		è tipicamente salvato su HDD come codice oggetto;
+	
+	- Linking dei moduli: rende il codice oggetto eseguibile. Il compilatore costruisce in modo
+		"incrementale" il file eseguibile unendo (linking) i diversi codici oggetto:
+
+			gcc -o main f.o main.o 					// Genera un eseguibile di nome (-o) main
+
+		Se ho tanto codice diviso in moduli e apporto una piccola modifica a uno di essi, posto di avere
+		per ognuno il file oggetto, invece di ricompilare tutto da capo mi è sufficiente compilare in .o
+		il file modificato e poi chiamare solo il linker.
+
+In generale esistono compilatori che eseguono tutto questo lavoro "in una sola passata" (senza divisioni o
+step intermedi come quello del precompilatore). Ognuno di essi deve comunque eseguire le operazioni
+standard per trasformare il codice sorgente in codice eseguibile.
+
+	- Analisi lessicale: il compilatore spezzetta il sorgente negli elementi fondamentali (TOKEN).
+		Individua quindi le keywords (if, while, for, ...), i numeri, gli identificatori, la
+		punteggiatura... Questo avviene mediante un AUTOMA A STATI FINITI che sfrutta le ESPRESSIONI
+		REGOLARI. Ad esempio, la RegEx per un identificatore dice che esso è composto da un carattere
+		alfabetico seguito da una sequenza che può contere caratteri alfanumerici e speciali. Quando
+		in analisi lessicale l'Automa legge "a_3" restituisce "identificatore". L'output di questa fase
+		è quindi un codice "tokenizzato" con la RegEx corrispondente associata;
+
+	- Analisi sintattica: se il compilatore arriva qui significa che tutti i token (che possiamo vedere
+		come parole di una lingua) hanno senso di per sé, ma hanno senso anche disposti nell'ordine dato
+		dal sorgente? Qui entra in gioco la GRAMMATICA, che dice al compilatore quali sequenze di token
+		definiscono un comando ammesso nel linguaggio. L'analisi sintattica costruisce la struttura delle
+		frasi mediante un ALBERO SINTATTICO, che è uno schema "logico" (indipendente da punteggiatura o
+		altro) che funge da algoritmo;
+
+	- Analisi semantica statica: se l'algoritmo ha senso, il compilatore verifica che tutti i simboli siano
+		stati definiti e fa il controllo dei tipi, restituendo warning in caso di errori;
+
+	- Generazione del codice intermedio: seguendo l'albero sintattico con le annotazioni semantiche, il
+		compilatore costruisce il codice oggetto;
+
+	- Ottimizzazione e generazione del codice macchina definitivo: a seconda del processore che eseguirà
+		il codice, è possibile rendere più efficiente il linguaggio macchina.
+
+Sulla base di queste operazioni, il lavoro del compilatore può essere diviso in
+
+	- Analisi/Sintesi: l'elemento di separazione tra le due fasi è la creazione dell'albero sintattico
+		con le annotazioni semantiche;
+
+	- Front-End/Back-End: l'elemento di separazione è la creazione del codice intermedio. Prima dell'
+		ottimizzazione, il processo è indipendente dall'architettura sulla quale il codice verrà eseguito.
+		Ogni compilatore per linguaggio C ha in comune il front-end, mentre il back-end è differenziato in
+		base alla macchina su cui è installato. Un compilatore che realizza una back-end diversa rispetto
+		a quella su cui è implementato è detto CROSS-COMPILATORE (tipo nel caso di un'app per smartphone).
+
+E' possibile scrivere il compilatore del linguaggio all'interno del linguaggio stesso (BOOTSTRAPPING).
+
+
+MAKEFILE (https://makefiletutorial.com/)
+Nel momento in cui ho un codice sviluppato su molti moduli può essere comodo automatizzare il processo
+di "minima compilazione necessaria". Ovvero, se modifico un solo modulo è davvero necessario ricompilarli
+tutti? C'è un comando di UNIX dedicato a questo. Ipotizziamo di avere una libreria divisa in mymath.h,
+mymath.c e un main nel file provamymath.c. Le regole di compilazione si possono riassumere in
+
+
+	mymath.o: mymath.c mymath.h 			// Per ottenere mymath.o mi servono mymath.c e mymath.h
+		g++ -c mymath.c 					// Se modifico uno di questi due file, esegui questo comando
+	
+	provamymath: provamymath.o mymath.o 	// Analogo
+		g++ -o provamymath provamymath.o mymath.o
+
+	provamymath.o: provamymath.c mymath.h 	// Analogo
+		g++ -c provamymath.c
+
+L'esecuzione del comando MAKE controlla quale file è stato modificato ed esegue tutte e sole le
+compilazioni necessarie. Ad esempio, se modifico mymath.c non è necessario eseguire il terzo comando.
+Si noti che questo meccanismo è indipendente dal linguaggio di programmazione.
+
+
+ESECUZIONE
+A questo punto è possibile eseguire il programma. Il SO manda il programma in RAM e deve decidere quanta
+e quale memoria allocare. Nel programma questo non è scritto! Il codice contiene solo dei riferimenti
+relativi alle locazioni di memoria, rendendolo RILOCABILE. E' addirittura possibile, quando ad esempio il
+programma termina la memoria assegnatagli, che il SO riallochi il tutto in una pagina di memoria più
+grande, rendendo necessario il ricalcolo di tutti gli indirizzi. Spesso questo tipo di operazioni sono
+svolte in modo molto efficiente su registri dedicati.
+Nota storica: non è sempre stato così. I primi computer allocavano uno spazio fisso al programma.
+

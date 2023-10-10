@@ -1,0 +1,42 @@
+Permettono I/O con l'HDD (leggi: struttura per la memorizzazione non-volatile dei dati).
+Il C definisce un tipo FILE come record, e le operazioni su file avvengono mediante puntatori
+a strutture di questo tipo. Ad esempio:
+
+	FILE* filename = NULL;						// Dichiarazione puntatore a file (inizializzato a NULL);
+	
+Anzitutto è necessario comunicare al SO di aprire il file:
+
+	FILE *f = fopen(filename, opening_mode);		// Restituisce NULL in caso di errore in apertura;
+
+	FILE *f = fopen("/home/studente/Documents/myfile.txt", "r");	// Path assoluto e modalità sola lettura;
+
+Le opening mode permesse sono
+
+	- r: default, sola lettura;
+	- w: scrittura (sovrascrive un file già esistente, lo crea se non esiste);
+	- a: accodamento (aggiunge alla fine del file già esistente, lo crea se non esiste);
+	- +: Può essere aggiunto a qualsiasi delle tre opzioni precedenti, consente lettura e scrittura.
+
+Una volta terminate le operazioni sul file, è buona norma chiuderlo con la funzione fclose(filename), che
+restituisce 0 in caso di corretta chiusura e la costante EOF (definita in <stdio.h>) in caso di errore.
+In generale, oltre a EOF (End Of File) ci sono altri caratteri speciali (\n EOLN, End Of Line, o \t).
+
+Alcune funzioni hanno un analogo per i file del tipo printf --> fprintf.
+
+	- fprintf(*filename, "testo", parametri);	// Autoesplicativo
+
+	- fputs(stringa, *filename);				// Per una stringa
+
+	- fputc(char, *filename);					// Per un char
+
+	- fscanf(*filename, "%s", stringa);			// Legge parola per parola. Ritorna il numero di campi letti e
+													assegnati correttamente. Raggiunta la fine del file oppure
+													in caso di errore ritorna EOF;
+
+	- fgets(*riga, N, *filename);				// Legge una *riga per volta, avente massimo N-1 caratteri;
+	
+	- fgetc(*filename);							// Legge un carattere per volta. A fine file legge EOF.
+
+E' prassi leggere da file usando un ciclo while. Il cursore (Buffer File) si sposta di conseguenza, e il
+computer tiene in memoria la sua posizione. Non torna indietro: in caso serva farlo bisogna chiudere e
+riaprire il file.

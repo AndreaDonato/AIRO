@@ -1,0 +1,143 @@
+TIPI DI DATO PRIMITIVI
+Il C offre 4 tipi fondamentali di dato primitivi, di cui 3 per i numeri e uno che alla fine si può
+ricondurre a un numero.
+	
+	int: Numeri interi. Tipicamente, il compilatore alloca 32bit (4byte), per cui può rappresentare 2^32
+		numeri, che usando il primo bit per il segno vanno da -2^31-1 a 2^31-1.
+		Sono definite le operazioni +, -, *, / (divisione intera) e % (resto della divisione intera).
+		In <limits.h> sono definiti massimo e minimo intero rappresentabile (INT_MIN e INT_MAX).
+		Gli interi sono soggetti all'OVERFLOW: se vado oltre uno dei limiti ottengo risultati
+		inconsistenti. Esempio:
+			
+			int x = INT_MAX;
+			printf ("%d\n", x); 			// Stampa 2147483647, massimo valore rappresentabile con int)
+			x ++; 							// Incrementa x di 1
+			printf ("%d\n", x) ; 			// Stampa -2147483648, minimo valore rappresentabile con int)
+
+	float: Numeri reali in virgola mobile. Anche qui il compilatore alloca 32bit, la precisione è di ~7
+		cifre decimali perché usano la rappresentazione scientifica (es: 314E-2f).
+		Per il calcolo del massimo/minimo numero consideriamo che dei 32bit uno è per il segno del numero 
+		e uno per il segno dell'esponente. Dei 30 che restano 6 sono per l'esponente e i restanti 24 per
+		il numero (circa 8 cifre divise {1}.{7}). Nello specifico {min, max} = {1.4012985*10**-38,
+		3.4028235*10**38}. Operazioni +, -, *, / (divisione).;
+
+	double: Numeri reali in virgola mobile, ma con precisione doppia (~15 cifre decimali). Considerazioni
+		analoghe, massimo esponente 308 invece di 38. Rappresentazione scientifica opzionalmente seguita
+		da d (es: 314E-2 == 314E-2d). Notare che i float e i double sono più densi sui reali vicino allo
+		zero. Questo significa che se provo a fare operazioni su numeri che superano il numero di cifre
+		della precisione il calcolatore potrebbe non eseguirle. Esempio:
+
+			float x = 1222333444.0;			// Ho specificato 10 cifre per un float
+			printf("x = %f\n", x);			
+			x += 1.0;						// Se aggiungo 1.0 (fuori dalla precisione del tipo float)
+			printf ("x + 1.0 = %f \n", x);	// Riottengo 1222333444.0
+			x += 79							// Se invece aggiungo qualcosa che tocca la precisione del
+												float ottengo qualcosa come 1222333572.0. 
+			printf ("x + 1.0 = %f \n", x);	// Importante notare che oltre la settima cifra non resto
+												coerente con l'operazione che ho fatto, ma mi sposto al
+												successivo valore rappresentato nel calcolatore.
+
+		E Python come fa? Fa il paraculo. Assegna un tot di memoria, vede se il numero entra e in caso
+		contrario ne assegna un po' di più.
+
+	char: Caratteri alfanumerici e speciali. Gli vengono assegnati 8bit e fa riferimento alla codifica
+	ASCII. Si possono addirittura sommare come interi. Esempio:
+
+			char c = 'A';
+			int i = 65;
+			printf ("%c\n", i); 					// Stampa A  (i come char)
+			printf ("%d\n", c);	 					// Stampa 65 (c come int)
+
+Vengono anche forniti dei QUALIFICATORI, che consentono di modificare la dimensione (in bit) del formato
+di alcuni tipi e la rispettiva interpretazione.
+	
+	short: Senza altre specifiche si intende short int. Dimezza l'allocazione di memoria, passando da 2^32
+		a 2^16 numeri rappresentabili;
+	long: Come per short. Raddoppia l'allocazione di memoria (per il tipo int solo su sistemi a 64bit), si
+		scrivono aggiungendo L alla fine (long int a = 20000L, specifica il formato);
+	unsigned: Non rappresenta i negativi, quindi il range per un unsigned int è [0, 2^32-1]. Si può avere
+		un unsigned char, che raccoglie la codifica ASCII da 0 a 255.
+
+Sono valide tutte le combinazioni dei primi due qualificatori col terzo (es: unsigned long long int).
+E' sconsigliato usare "numeri magici" nel codice (ovvero costanti di cui il programmatore sa il
+significato ma che restano senza spiegazione). Si può dichiarare una costante scrivendo
+
+	#define COSTANTE 30								// Fuori dal main, processata dal precompilatore che a
+														ogni occorrenza di COSTANTE sostituisce il suo 
+														valore. Debole rispetto al controllo del tipo.
+	const int COSTANTE = 30;						// Dentro al main, processata dal compilatore che
+														avvisa della possibile perdita di informazione nel 
+														caso si assegni 21.5f a una costante intera. 
+
+Si parla di operazione con SIDE-EFFECT nel momento in cui oltre a valutare un'espressione modifico la 
+memoria. Esempio: {x = 0; print("%d", x=7);} stampa 7 ma ha il side-effect di rendere x = 7.
+Quando si usa l'operatore di incremento ++ (o analogo --) il side-effect cambia a seconda di dove lo si 
+piazza:
+	
+	- Il valore dell’espressione x++ è pari al valore iniziale della variabile x;
+	- Il valore dell’espressione ++x è pari al valore iniziale della variabile x incrementato di 1.
+
+Motivo per cui:	
+
+	int x = 0;
+	printf("%d", x++); 								// Stampa 0
+	printf("%d", x); 								// Stampa 1
+	printf("%d", x--); 								// Stampa 1
+	printf("%d", x); 								// Stampa 0
+	printf("%d", ++x); 								// Stampa 1
+	printf("%d", --x); 								// Stampa 0
+	printf("%d", x); 								// Stampa 0
+
+
+LETTURA E SCRITTURA
+scanf e printf sono definite nella libreria stdio.h, così come due funzioni specifiche per i char.
+
+	scanf: prende parametri (stringa, &par1, &par2, ...), dove la stringa deve contenere il formato del 
+		dato letto e i parametri sono i puntatori alle variabili da assegnare.
+		Le specifiche di formato più comuni sono:
+
+			int 					%d
+			unsigned int 			%u
+			short int 				%hd
+			long int 				%ld
+			float 					%f
+			double 					%lf
+			char 					%c
+			puntatore (indirizzo)	%p
+		
+		E' possibile evitare di scrivere la & davanti alle variabili definendo direttamente un puntatore:
+
+			int* p = (int*) malloc(sizeof(int));
+			...
+			scanf("%d", p);
+
+	printf: prende parametri (stringa, par1, par2, ...), dove la stringa può contenere elementi di tipo % 
+		della tabella precedente, ai quali in ordine vanno associati i parametri da stampare.
+
+	getchar(): Legge e restituisce un carattere inserito in input (a rigore un int, ma diciamocelo, alla 
+		fine i char sono int);
+
+	putchar(c): Stampa il carattere argomento.
+
+Vi sono poi caratteri speciali detti SEQUENZE DI ESCAPE, ovvero:
+	
+	\a: Emette il suono di alert;
+	\b: Cancella l'ultimo carattere;
+	\n: A capo;
+	\r: Torna a inizio riga;
+	\t: Tab;
+	\\, \', \": Stampano i caratteri speciali \, ' e ".
+
+
+CONVERSIONE DI TIPO
+In alcuni casi, C "aggiusta" autonomamente piccole incongruenze di tipo. Esempio: int x = 3.2 produrrà
+x = 3 (in generale usa la funzione floor()). In generale, nel farlo, cerca di non perdere informazione: se
+scrivo 3 + 4.2 il risultato sarà float. Non è detto che ci riesca: se provo ad assegnare un int a uno
+short int possono uscire cose a caso. E' possibile farlo manualmente mediante l'operazione di CAST, avente
+sintassi (tipo) espressione. Nel farlo potrei perdere informazione: double d; f = (float) d; riduce la
+precisione. Sempre meglio eseguire il cast in modo esplicito, per chiarezza di codice.
+
+E' possibile sapere quanta memoria viene allocata per un tipo di variabile o una variabile: sizeof().
+
+E' possibile definire nuovi tipi di variabile con il comando typedef, ma sempre in modo compatibile con i 
+tipi primitivi.

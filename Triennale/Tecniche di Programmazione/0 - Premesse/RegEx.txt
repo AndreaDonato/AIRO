@@ -1,0 +1,30 @@
+A livello matematico, è un semplice linguaggio di programmazione per la sintassi delle stringhe.
+
+	- Un ALFABETO A è un insieme di simboli che posso utilizzare;
+
+	- Una STRINGA è una sequenza di elementi dell'alfabeto.
+
+	- A^n è l'insieme di tutte le stringhe di lunghezza n fatte da simboli di A;
+
+	- A* è l'insieme di tutte le stringhe fatte da simboli di A.
+
+	- La CONCATENAZIONE di stringhe si indica con /dot;
+
+Un'espressione regolare divide l'insieme infinto A* in due sottoinsiemi: quello delle stringhe che collimano e quelle che non collimano.
+Seguono proprietà delle RegEx.
+
+	-La stringa vuota ed è un'espressione regolare;
+
+	- Ogni simbolo dell'alfabeto è un'espressione regolare;
+
+	- Se x è un'espressione regolare, lo è anche 
+
+		- x* (x ripetuto da zero a N volte);
+		- x? (x è presente o meno);
+		- (x) (x è raggruppato).
+	
+	- Se x ed y sono espressioni regolari, lo è anche
+
+		- la loro concatenazione x /dot y;
+		- l'alternativa x | y.
+

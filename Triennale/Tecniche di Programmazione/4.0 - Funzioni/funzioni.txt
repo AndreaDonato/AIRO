@@ -1,0 +1,60 @@
+Roba già nota:
+sintassi e semantica
+funzione main, nome particolare che serve al compilatore per capire da dove iniziare.
+return chiude funzione. nel main intero usato dal SO per specificare l'esito dell'esecuzione.
+distinzione funzioni void e tutte le altre
+attenzione alla leggibilità
+___
+
+Parametro ATTUALE: valore passato alla funzione al momento della chiamata;
+Parametro FORMALE: usato nella definizione della funzione.
+
+Il nome della funzione e la descrizione (tipo, numero e posizione) dei parametri formali prendono il nome di
+SEGNATURA. In C NON posso definire funzioni con stesso nome ma diversa segnatura (in C++ sì), ovvero C
+non consente l'OVERLOADING. Un esempio può essere
+
+	int somma(int x, int y) {
+		return x+y;
+	}
+	
+	int somma(double x, double y) {
+	return (int) (x+y) ;
+	}
+
+Al momento della chiamata, il compilatore determina se questa è legittima.
+Si possono distinguere diversi tipi di passaggio dei parametri:
+
+	- Per valore: Generalmente usato per parametri di tipi primitivi o da non modificare. Iter:
+
+		- Valuto il parametro attuale;
+		- Individuo la funzione da eseguire in base a nome e numero di parametri. Il numero e il tipo
+			dei parametri attuali devono coincidere con i corrispettivi formali;
+		- Sospendo l'esecuzione dell'unità di programma chiamante;
+		- Alloco memoria per i parametri formali e assegno loro i valori dei parametri attuali. L'area
+			di memoria coinvolta (Record di Attivazione, RDA) è diversa rispetto a quella del main, e viene
+			rilasciata al termine della	funzione;
+		- Eseguo il corpo della funzione;
+
+	- Per puntatore: Un sottocaso del precedente in cui posso modificare le variabili puntate;
+
+	- Per riferimento: SOLO IN C++, ma è come il caso precedente. I parametri si passano preceduti dall'
+		operatore & (es: &a) e poi si usano nel corpo della funzione senza specificare il puntatore (es: a).
+
+Una funzione può restituire valori di tipo puntatore. Come si vede nell'esempio "funzione_puntatore" in
+questa cartella, posso allocare memoria heap all'interno di una funzione e passare il puntatore a quella
+memoria come risultato della funzione.
+E' possibile usare una funzione come parametro, specificandone l'intestazione. In riferimento al programma
+"funzione_come_parametro.c", *f è un parametro formale alla stregua di primo, ultimo e inc. Posso chiamare
+la funzione che passo scrivendo (*f) al posto del nome.
+
+Il campo d'azione è un concetto di tipo statico. Se definisco una variabile stack nella funzione, questa
+verrà dimenticata al termine della sua esecuzione. Posso però usare una keyword, STATIC, per non far
+dimenticare al programma le variabili definite in una funzione. Se scrivo [int static i;] dentro una
+funzione, questa sarà tenuta in memoria anche al di fuori. Il suo uso è DEPRECATO.
+Usato per una funzione, static indica che essa è disponibile solo all'interno del file in cui è definita.
+Il contrario si ottiene con la keyword EXTERN, di cui però non mi va di cercare le specifiche al momento.
+Posso definire una variabile globale fuori da ogni funzione (main compreso).
+
+UNA FUNZIONE PUÒ MODIFICARE I VALORI PUNTATI DAI PUNTATORI SOLO SE SONO SALVATI IN MEMORIA HEAP!
+UN PUNTATORE PUÒ PUNTARE ANCHE ROBA IN STACK, QUINDI MI BECCO SEGMENTATION FAULT SE PASSO UN PUNTATORE
+DICHIARATO SOLO IN MODO STATICO E PROVO AD ACCEDERE AL SUO CONTENUTO DENTRO LA FUNZIONE!

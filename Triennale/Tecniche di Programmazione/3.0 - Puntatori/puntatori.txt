@@ -1,0 +1,71 @@
+La memoria di un elaboratore è organizzata in celle contigue, tipicamente da 1 byte, ciascuna con un
+proprio indirizzo tipicamente rappresentato in esadecimale. Ad esempio, per un sistema a 32bit si usano
+8 cifre hex ciascuna rappresentativa del gruppo di 4bit corrispondente alla sua rappresentazione in
+sistema binario. Una variabile identifica un certo numero di celle contigue, dipendente dal tipo di dato
+che memorizza (Es: 1 cella per char, 4 celle per int, ...). Accedendo ad una variabile, si accede al
+contenuto delle celle identificate dalla variabile.
+
+PUNTATORI
+Si possono definire delle VARIABILI DI TIPO PUNTATORE che assumono come valori indirizzi di memoria.
+Vi sono due operatori associati:
+
+	- Operatore &: restituisce l'indirizzo della prima cella di memoria del gruppo identificato dalla
+		variabile a cui viene applicato;
+	- Operatore *: accede al contenuto della locazione di memoria identificata dall'indirizzo a cui
+		viene applicato.
+
+Quando viene dichiarata una variabile di tipo puntatore bisogna specificare il tipo di dato contenuto
+nella locazione puntata. Ha senso se si considera che dopo aver puntato un indirizzo deve sapere quante
+celle leggere. Il comando [int *p;] alloca memoria per la variabile puntatore p1 ma non alloca memoria
+per l'int che dovrebbe essere scritto all'indirizzo puntato. (Notare che l'indirizzo puntato al momento è
+casuale, perché non ho inizializzato niente). Se quindi provassi subito dopo a scrivere ed eseguire il
+comando [*p = 1;] darebbe errore a runtime. Bisogna quindi fare [int i, *p; p = &i; *p = 10;] oppure
+[int i; int* p = &i; *p = 10;]. Naturalmente più puntatori possono puntare allo stesso indirizzo, e
+se ne può cambiare il contenuto tramite qualsiasi di essi (memoria condivisa). Posso usare l'operazione
+di cast in modo analogo agli altri tipi: [int* p; char c; (char*) p = &c;]. Ovviamente l'uguaglianza è
+
+	- p1 == p2: Vero se p1 e p2 puntano alla stessa locazione di memoria;
+	- *p1 == *p2: Vero se p1 e p2 puntano a locazioni di memoria contenenti lo stesso valore.
+
+Posso anche modificare l'indirizzo di memoria di un puntatore. Ipotizziamo un'architettura a 32bit in cui
+i ha indirizzo di memoria 0x00AF0001. All'int vengono allocati 4byte, motivo per cui le celle contigue con
+indirizzo fino a 0x00AF0004 sono allocate per i. Se chiedo a un puntatore ad int di puntare all'indirizzo
+successivo a quello di i non posso spostarmi di 1byte, perché mi troverei nel mezzo dell'int precedente.
+Quindi se scrivo
+
+	int i = 10;
+	int* p = &i;
+	int* q = p + 2;				// Indirizzo di p + 2*sizeof(int)
+
+q punterà due indirizzi dopo p dando per scontato di "saltare" tra tipi int, quindi il valore di q alla
+fine di queste tre righe sarà 0x00AF0009. Stessa cosa dicasi per la sottrazione. Se facendo questa o altre
+operazioni punto a un indirizzo al di fuori della memoria allocata per il programma ottengo un errore di
+SEGMENTATION FAULT. Vi sono diversi strumenti per cercare di evitare errori di questo tipo:
+
+	- Per inizializzare un puntatore senza un indirizzo di memoria specifico si usa il valore NULL;
+	- Si può dichiarare un puntatore di tipo void se non si conosce a priori la natura della variabile
+	puntata. Nel momento in cui si assegna, il cast è automatico e il puntatore diventa del nuovo tipo;
+
+Inoltre, si può definire un puntatore a costante, tale che il valore puntato non possa essere modificato
+(ma il suo indirizzo sì):
+
+	double pi = 3.5;
+	const double *pt = &pi ;	
+	(*pt)++;	 				// ERRORE: *pt è costante
+	pt++;						// OK: pt non è costante
+
+Posso definire un puntatore a una variabile puntatore.
+
+	int x = 4, *pt = &x, **ptpt = &pt;
+	printf("%d\n", **ptpt);		//Stampa x, ovvero 4
+
+Notare che applicando l'operatore di unpacking * iterativamente posso accedere al valore puntato a qualsiasi
+profondità: **ptpt = *(*ptpt) = *(pt) = *pt = x. Con questo meccanismo posso costruire strutture dati più
+complesse.
+
+ATTENZIONE!! PER LA PRECEDENZA DEGLI OPERATORI *p++ VIENE LETTO COME *(p++)!!
+SE VUOI INCREMENTARE L'INT PUNTATO DA P DEVI FARE (*p)++!!
+
+
+Link utili:
+https://stackoverflow.com/questions/44225817/where-do-pointer-points-exactly
