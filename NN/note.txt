@@ -35,3 +35,17 @@ PENALIZZARE qualcosa. Se metto T < 1 rafforzo il guess del modello ma perde di
 generalità
 
 E VARIANTI DI COSE COME IN ML
+
+
+
+
+11/10 Commicoso
+Per definire il layer servono
+	
+	- Modello
+	- Loss function
+	- Gradiente della Loss function (...)
+
+Possiamo immaginare un classificatore (probabilistico?) non lineare come una
+funzione che aumenta la dimensionalità permettendo una separazione lineare
+di tipo iperpiano. Credo.
