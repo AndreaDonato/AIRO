@@ -49,3 +49,105 @@ Per definire il layer servono
 Possiamo immaginare un classificatore (probabilistico?) non lineare come una
 funzione che aumenta la dimensionalità permettendo una separazione lineare
 di tipo iperpiano. Credo.
+
+
+
+18/11 Scardapane
+Calibration
+Nulla mi garantisce che la probabilità della classe sia la confidenza di
+predizione. Devo distinguere l'ACCURACY e la CONFIDECE. Se la condfidenza
+media è più alta dell'accuracy media, tenderò a fare errori. Se sono uguali,
+il mio modello è CALIBRATO. Ci sono tecniche per misurarla/migliorarla
+
+
+
+(Not) Gradient Descent
+Automatic Differentiation
+Back-Propagation
+
+Approccio funzionale (Jax) meglio per gestire i parametri (fuori dalle classi) e
+per "chain rules". Si può passare da PyTorch/Tensorflow a Jax con la
+Purification. PyTorch ha un'implementazione funzionale che fa questo.
+A lui piace l'approccio funzionale, nonostante siano equivalenti.
+Non posso fare side effect (?)
+
+Ogni rete è sequenza di primitive (layer, cross-entropy, ...) e assumiamo che il
+prodotto finale sia un singolo valore (es: una loss) di cui posso fare il
+gradiente.
+
+E come lo faccio il gradiente?
+
+	- jacobian accumulation problem
+
+
+++Forward mode++
+Tengo traccia di ogni gradiente nel mentre che vado avanti.
+Più semplice ma inefficiente per le NN. La complessità del prodotto di matrice
+scala linearmente sulle tre dimensioni coinvolte, ma queste scalano siano con
+la batch size (#input) e con la size del singolo input. Quindi lo scaling è
+almeno O(batch_size^2).
+
+
+++ Reverse mode (CS) - Back-Propagation (NN)) ++
+Invece di calcolare un botto di matrici per poi renderle alla fine un vettore,
+parto da destra e faccio solo calcoli di tipo matrice x vettore. Questo rende
+il processo molto più efficiente in termini di tempo ma molto meno in termini
+di memoria (devo salvare tutto quello che faccio fino a fine processo per poi
+backpropagarlo).
+(grad_fn nell'oggetto tensore in PyTorch tiene traccia di quale operazione ha
+creato quel tensore.)
+
+
+Perché ho bisogno di fda non lineari? E cosa implica, e a cosa serve una fda?
+Chedilo a ChatGPT
+
+In Practice
+Non serve calcolare lo jacobiano ma solo il suo prodotto col vettore (vjp).
+Questo rende i calcoli molto meno gravosi perché l'espressione del vjp è
+spesso più semplice del calcolo esplicito dello jacobiano.
+
+La funzione di attivazione pesa il gradiente tramite la sua derivata.
+Se questa è sempre < 1 faccio vanishing gradient, viceversa exploding.
+
+	- Sigmoide è sempre piccola in modulo. Per grandi NN non va;
+	- ReLU, meglio, va gestito lo zero in input e i troppi zeri che produce
+		in output (distruggono il gradiente);
+
+	- Varianti di ReLU come LeakyReLU, ELU, ...
+
+Come le hanno trovate?
+	Le hanno letteralmente provate tutte. Molto da ingegnere in effetti.
+
+Un GD classico impiegherebbe ere geologiche: si usa la STOCHASTIC GD.
+Invece del BATCH di tutti i dati uso un MINI-BATCH (la cui size è un
+iperparametro).
+In PyTorch ad esempio il DataLoader costruisce i mini-batches.
+Non sempre lo shuffle è su True perché potrei voler costruire un test set.
+
+
+# ToDo
+
+differenza tra iteration ed epoch (to compute accuracy, ...)
+
+
+MiniTorch
+
+
+We need a framework for deep learning, how do we build it?
+
+HW (General Programming GPUs (Nvidia), TPU (Google), IPU (Intel), ...)
+Interface (compilers (ottimizza quello che scrivi anche con operators fusion),
+	dispatchers (difference??? what is it???)...)
+Linear algebra
+Autodiff
+Neural models
+Architectures (data, training, ...)
+Ci sono layer più alti ma non li trattiamo (interface (large scale training), LLM
+	engineering)
+
+Kernel!!
+Sparse CPU??
+CUDA??
+XLA??
+
+Registrazione degli ultimi minuti lezione 19/10
