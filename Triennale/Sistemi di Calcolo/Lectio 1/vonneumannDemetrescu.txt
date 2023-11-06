@@ -28,7 +28,7 @@ ISA deve definire istruzioni per
 
 COMPILATORE/INTERPRETE
 Assembly è traduzione leggibile (con keyword) del linguaggio macchina binario (comprensibile alla CPU in fase decode).
-La traduzione da Assembli a linguaggio macchina è il processo di ASSEMBLAMENTO, eseguito dall'ASSEMBLATORE.
+La traduzione da Assembly a linguaggio macchina è il processo di ASSEMBLAMENTO, eseguito dall'ASSEMBLATORE.
 L'inverso è eseguito dal DISASSEMBLATORE, uno degli strumenti preferiti dagli hacker.
 Per passare da un linguaggio ad alto livello (come C) ad Assembly si usa il COMPILATORE.
 

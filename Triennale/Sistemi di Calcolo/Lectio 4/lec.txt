@@ -60,11 +60,11 @@ Nel farlo è stato molto utile tmux (grazie ad Ale).
 
 https://docs.oracle.com/it/learn/oracle-linux-tmux/#manage-terminal-window-panes
 
-INTEGER PROMOTION: in C, le variabili più corte di int vengono "promosse" a int. Se passo uno short, viene passato come int.
+INTEGER PROMOTION: in C, qualsiasi parametro attuale più corto di int viene "promosso" a int. Se passo uno short, viene passato come int.
 	Se il numero è positivo viene esteso con tutti zeri, se è negativo tutti uno (ricordiamo che -1 in binario è rappresentato come 111111111).
 
 WORD SIZE: numero di bit che possono essere manipolati da una singola operazione macchina
-Definisce anche la memoria massima (indirizzi). A 32bit ho massimo 4Gb. A 64bit oltre 16Tb.
+	Definisce anche la memoria massima (indirizzi). A 32bit ho massimo 4Gb. A 64bit oltre 16Tb.
 
 PUNTATORI.
 Se scrivo in C

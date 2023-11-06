@@ -237,4 +237,34 @@ Se invece fosse
 
 	int g(char c){}
 
-avrei promozione a intero di *p anche se c è un char. m20 L9
+avrei promozione a intero di *p anche se c è un char. Traduciamo in Assembly:
+
+	.globl f
+
+	f:
+								# All'ingresso in f mi sposto automaticamente di 4 per il valore di ritorno
+		subl $4, %esp 			# Faccio spazio per il parametro attuale upcastato int (in modo da poterlo passare a g)
+		movl 8(%esp), %ecx		# Sposto il valore contenuto in esp+8 in ecx
+		movb (%ecx), %al 		# Vero che ho upcastato, ma il dato reale è un char. Accedo alla memoria puntata dall'indirizzo salvato in ecx e salvo solo un byte.
+		movsbl %al, %eax 		# Promozione intera con la movs
+		movl %eax, (%esp)		# Metto il valore in stack, dove avevo lasciato spazio e dove ancora punta esp
+		call g
+		addl $4, %esp 			# Epilogo che compensa la subl
+		ret
+
+
+
+ISTRUZIONI IA-32 PER IL CALCOLO DI ESPRESSIONI BOOLEANE (SETcc)
+E' un'istruzione con output un solo byte che viene messo a 1 se cc è vera e 0 altrimenti.
+
+	int f(int x, int y)
+	{
+		return x < y;
+	}
+
+Attualmente dovrei tradurlo in un if-else. SETcc lo fa in automatico.
+
+	f:
+		movl 4(%esp)
+
+		L 9 M 30
