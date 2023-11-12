@@ -43,8 +43,16 @@ Ci sono a questo punto diversi tipi di operando a memoria:
 
 		NB: NON posso mettere due operandi a memoria come argomenti di una funzione assembly.
 
-	- ...?
+	- Indice, base e scala: è della forma spiazzamento(base, indice, scala) e referenzia la memoria data
 
+			base + (indice x scala) + spiazzamento
+
+		Ad esempio, posso scrivere
+
+			movl 8(%eax, %ecx, 4), %ebx
+
+		ovvero salva in ebx l'indirizzo eax + ecx*4 + 8
+		
 
 TRADUZIONE IF ELSE IN ASSEMBLY
 
@@ -87,6 +95,7 @@ Sulla base di questo proviamo a scrivere:
 	F: ret
 
 Che roba è cmpl?? In realtà Jcc fa un controllo tra i due argomenti del comando cmp precedente.
+La semantica di cmp è "com'è %eax rispetto a $10?". Se ad esempio in %eax c'è il valore 8, saranno vere le condizioni l, le, ne, mentre saranno false g, ge, e.
 A questo punto IF...ELSE è molto facile.
 
 	if(a<10) a = 1;

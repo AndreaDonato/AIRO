@@ -1,0 +1,67 @@
+Il SO è un software che prende il controllo della macchina fisica all'avvio e modera la gestione delle risorse e l'esecuzione dei programmi.
+Si tratta quindi sia di un ambiente di esecuzione programmi sia di interazione con gli utenti.
+Il SO è un cuscinetto tra le applicazioni (e poi gli utenti) degli strati superiori e l'HW in modo che essi interagiscano solo tramite esso.
+
+A livello più basso c'è l'HW. A fare da "ponti" di collegamento tra l'HW e il SO abbiamo l'ISA, il set di istruzioni che l'HW "comprende" e può eseguire,
+e l'ABI, convenzioni che specificano come i compilatori generano codice eseguibile (passaggio parametri, gestione stack, ...).
+
+Il ponte tra il SO e le applicazioni sovrastanti sono le API (Application Programming Interface), ovvero le collezioni delle dichiarazioni
+di tipi, funzioni, costanti, ... (distribuiti sottoforma di librerie) che permettono a un client di utilizzare un software.
+All'interno delle API ci sono anche le librerie del C standardizzate da ANSI C.
+Quando usiamo una printf stiamo usando un'API. Quando scriviamo e "pubblichiamo" una libreria stiamo usando un'API.
+Queste possono spaziare su vari livelli di complessità, da gestione di stringhe a manipolazione audio e video, fino a funzioni di interfaccia col SO.
+Sono alla base del principio di modularità.
+
+Il SO stesso è in realtà organizzato in più sezioni.
+
+	- Kernel: è il "nucleo" del SO, che si interfaccia direttamente con l'HW. Sue funzioni tipiche sono:
+
+		- Gestione dei processi:
+			- Creazione, terminazione, sospensione e ripresa dei processi;
+			- Pianificazione dei processi per l'esecuzione sulla CPU.
+			- Comunicazione tra i processi e sincronizzazione (...).
+
+		- Gestione della Memoria:
+			- Allocazione e deallocazione della memoria per i processi.
+			- Implementazione di schemi di gestione della memoria, come la paginazione o la segmentazione (???).
+			- Gestione degli errori di memoria.
+
+		- Gestione dell'I/O:
+			- Interazione con i driver di dispositivo per gestire l'I/O.
+			- Gestione delle code di I/O e dei buffer.
+			- Trattamento degli interrupt di I/O.
+
+		- Gestione dei Dispositivi:
+			- Inizializzazione e comunicazione con i driver di dispositivo.
+			- Fornitura di un'interfaccia standard per le applicazioni per interagire con i dispositivi hardware.
+		
+
+	- Gestore della Rete (Network Manager): Gestisce le comunicazioni di rete, inclusa l'inizializzazione delle connessioni di rete, la gestione
+		delle trasmissioni e la sicurezza delle comunicazioni di rete.
+
+	- Filesystem: Gestisce la memorizzazione e l'organizzazione dei dati su dispositivi di archiviazione come dischi rigidi.
+		Fornisce un'interfaccia standard per accedere e manipolare i file, inclusi i diritti di accesso e le strutture di directory.
+
+	- Servizi di Sistema: Fornisce servizi aggiuntivi come la gestione degli account utente, la sicurezza, la stampa e altri servizi di supporto.
+
+Tutte le sezioni che lo seguono, operano sia nel Kernel sia nello spazio utente.
+
+L'utente interagisce col SO in due modi:
+
+	- CLI (Command Line Interface), come la Shell;
+	- GUI (Graphic User Interface), desktop environment come Gnome, KDE, ...;
+
+Su CLI vi sono comandi detti BINUTILS, collezione di strumenti standard come ls, ps, cp, echo, ...
+Queste funzioni non hanno nulla di diverso da un nostro "hello_world.x" (se non che sono più sofisticate e interagiscono con il filesystem sottostante).
+Sono tutte allo stesso livello concettuale, quello delle applicazioni.
+
+Ora, in un caso come Linux (relativamente giovane, open source e quindi con molte versioni aventi kernel lievemente differenti) sarebbe spiacevole che un
+programma funzioni, per dire, solo su Ubuntu. Per questo esiste la famiglia di standard POSIX (Portable Operation System Interface) della IEEE.
+POSIX standardizza le API che consentono di programmare sistemi UNIX-like (UNIX è un marchio registrato e precedente a Linux), le binutils, le directories, le regex,
+i linguaggi di Shell (questi ultimi sono linguaggi interpretati, e la Shell è l'interprete), le variabili d'ambiente (come PATH), ...
+
+Nota sullo stato dell'arte: Attualmente POSIX e il marchio UNIX sono proprietà di OpenGroup. Per avere la certificazione che un SO sia compatibile POSIX tocca pagarli.
+	Linux è un po' punk e si rifiuta di farlo, motivo per cui è UNIX-like e non garantisce al 100% che sia tutto compatibile con POSIX (ovviamente Apple, IBM e Oracle pagano).
+	Di fatto però in pratica lo è. Perfino Windows ha un progetto per supportare POSIX, chiamato CYGWIN. Linux a rigore segue il suo Linux Standard Base (potremmo chiamarlo POSIX-like)
+
+L 15 m 33
