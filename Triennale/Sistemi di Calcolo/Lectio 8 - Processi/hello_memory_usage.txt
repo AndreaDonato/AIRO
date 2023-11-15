@@ -1,0 +1,22 @@
+565b0000-565b1000 r--p 00000000 08:02 11932641                           /home/shaytaan/Desktop/int main/AIRO/Triennale/Sistemi di Calcolo/Lectio 8 - Processi/hello
+565b1000-565b2000 r-xp 00001000 08:02 11932641                           /home/shaytaan/Desktop/int main/AIRO/Triennale/Sistemi di Calcolo/Lectio 8 - Processi/hello
+565b2000-565b3000 r--p 00002000 08:02 11932641                           /home/shaytaan/Desktop/int main/AIRO/Triennale/Sistemi di Calcolo/Lectio 8 - Processi/hello
+565b3000-565b4000 r--p 00002000 08:02 11932641                           /home/shaytaan/Desktop/int main/AIRO/Triennale/Sistemi di Calcolo/Lectio 8 - Processi/hello
+565b4000-565b5000 rw-p 00003000 08:02 11932641                           /home/shaytaan/Desktop/int main/AIRO/Triennale/Sistemi di Calcolo/Lectio 8 - Processi/hello
+56603000-56625000 rw-p 00000000 00:00 0                                  [heap]
+f7c00000-f7c20000 r--p 00000000 08:02 14813297                           /usr/lib/i386-linux-gnu/libc.so.6
+f7c20000-f7da2000 r-xp 00020000 08:02 14813297                           /usr/lib/i386-linux-gnu/libc.so.6
+f7da2000-f7e27000 r--p 001a2000 08:02 14813297                           /usr/lib/i386-linux-gnu/libc.so.6
+f7e27000-f7e28000 ---p 00227000 08:02 14813297                           /usr/lib/i386-linux-gnu/libc.so.6
+f7e28000-f7e2a000 r--p 00227000 08:02 14813297                           /usr/lib/i386-linux-gnu/libc.so.6
+f7e2a000-f7e2b000 rw-p 00229000 08:02 14813297                           /usr/lib/i386-linux-gnu/libc.so.6
+f7e2b000-f7e35000 rw-p 00000000 00:00 0 
+f7ed4000-f7ed6000 rw-p 00000000 00:00 0 
+f7ed6000-f7eda000 r--p 00000000 00:00 0                                  [vvar]
+f7eda000-f7edc000 r-xp 00000000 00:00 0                                  [vdso]
+f7edc000-f7edd000 r--p 00000000 08:02 14813277                           /usr/lib/i386-linux-gnu/ld-linux.so.2
+f7edd000-f7f02000 r-xp 00001000 08:02 14813277                           /usr/lib/i386-linux-gnu/ld-linux.so.2
+f7f02000-f7f11000 r--p 00026000 08:02 14813277                           /usr/lib/i386-linux-gnu/ld-linux.so.2
+f7f11000-f7f13000 r--p 00034000 08:02 14813277                           /usr/lib/i386-linux-gnu/ld-linux.so.2
+f7f13000-f7f14000 rw-p 00036000 08:02 14813277                           /usr/lib/i386-linux-gnu/ld-linux.so.2
+ffc8e000-ffcaf000 rw-p 00000000 00:00 0                                  [stack]
