@@ -1,0 +1,42 @@
+Seguiamo la vita e le opere di un processo.
+Partiamo dalla nascita: gcc crea il programma e lo salva su disco. NON è un processo: è eseguibile ma non è stato ancora eseguito.
+I formati tipici associati degli eseguibili sono
+
+	- ELF (Linux)
+	- PE (Windows)
+	- Mach (MacOSX)
+
+Ogni SO ha il suo modo di interpretare gli eseguibili. C'è una famiglia di syscall, detta EXEC, che fa partire un processo creandolo a partire da un eseguibile.
+Il processo di trasformazione di eseguibile in processo si dice LOADING. In particolare exec attiva un modulo del SO chiamato LOADER. Questo fa diverse operazioni.
+
+	- Verifiche preliminari: se falliscono il file non viene eseguito e la variabile ERRNO viene settata di conseguenza. Includono:
+		- Il file eseguibile è ben formato?
+		- Il processo che chiede di creare questo nuovo processo ha i permessi per farlo?
+		- Le risorse richieste sono disponibili?
+
+	- Creazione dell'immagine di memoria del processo:
+		- Codice
+		- Dati
+		- Stack di esecuzione
+		...
+
+	- Set dei registri per l'inizio dell'esecuzione, in particolare %esp (Stack Pointer) alla base della stack e Program Counter (Instruction Pointer) all'indirizzo _start.
+		- _start è la funzione di avvio che chiama il main. Fa cose come recuperare gli argomenti dalla CLI con delle syscall per poi organizzarli e passarli al main;
+
+	- Crea nello spazio di memoria del Kernel una struttura chiamata Process Control Block (PCB), da pensare esattamente come una struct in C, che tiene traccia di
+		tutte le informazioni utili alla gestione del processo. E' inaccessibile ai programmatori a meno che il SO non fornisca una syscall apposita. Cosa contiene?
+
+			- PID (Process ID): numero progressivo che identifica univocamente il processo. Quando parte il SO si avvia il processo _init con PID 0 che crea tutti gli altri;
+			- PPID (Parent PID): identifica il processo genitore;
+			- Puntatori allo spazio di memoria del processo;
+			- Privilegi del processo;
+			- Tabella dei file aperti dal processo;
+			- Accounting, ovvero tempo di esecuzione del processo;
+			- Limiti sull'uso delle risorse;
+			- Copia del contenuto dei registri;
+			...
+			...
+
+	- Avvio del processo
+
+A questo punto il controllo passa al processo, che parte. Questo significa banalmente che inizia il ciclo fetch-decode-execute. L 16 M 52
