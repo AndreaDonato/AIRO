@@ -1,0 +1,39 @@
+Elenco non esaustivo del significato delle cartelle in root del filesystem Linux
+
+	- /bin: Contiene i file eseguibili (programmi di base) che sono necessari per il funzionamento del sistema, accessibili a tutti gli utenti;
+
+	- /boot: Contiene i file necessari per l'avvio del sistema operativo, inclusi i kernel e i file di configurazione del bootloader;
+
+	- /dev: Contiene file speciali (device files) che rappresentano i dispositivi hardware o di sistema. Ad esempio, /dev/sda rappresenta il primo disco fisso.
+
+	- /etc: Contiene i file di configurazione del sistema e delle applicazioni. Configurazioni di rete, utenti, servizi, ecc., si trovano spesso in questa directory.
+
+	- /home: Contiene le home directory degli utenti del sistema.
+
+	- /lib e /lib64: Contengono librerie condivise (shared libraries) utilizzate da programmi essenziali per il sistema.
+
+	- /media e /mnt: Solitamente utilizzate per montare temporaneamente dispositivi di archiviazione esterni come unità USB, CD-ROM, ecc.
+	
+	- /opt: Spesso utilizzata per contenere pacchetti software di terze parti.
+
+	- /proc: Rappresenta un filesystem virtuale contenente informazioni dinamiche sul kernel, processi in esecuzione, ecc.
+
+	- /root: Home directory dell'utente root (superutente).
+
+	- /run: Contiene file temporanei specifici per il runtime del sistema.
+
+	- /sbin: Contiene file eseguibili essenziali per il sistema, utilizzati dall'amministratore di sistema durante la manutenzione del sistema.
+
+	- /srv: Spesso utilizzata per contenere dati specifici del servizio fornito dal sistema.
+
+	- /sys: Fornisce un'interfaccia al kernel per configurare e ottenere informazioni sullo stato del kernel e dei dispositivi.
+
+	- /tmp: Contiene file temporanei utilizzati da applicazioni e utenti. I file in questa directory possono essere eliminati durante il riavvio del sistema.
+
+	- /usr: Contiene file di sistema e programmi utilizzati da tutti gli utenti, con eccezione dei file eseguibili necessari per l'avvio del sistema.
+
+	- /var: Contiene dati variabili, tra cui log di sistema (/var/log), file spool di stampa (/var/spool), dati di pacchetti di software installati (/var/lib), ecc.
+
+	- /snap: Utilizzata per il supporto di pacchetti snap, che sono pacchetti software indipendenti dal sistema operativo.
+
+	- /lost+found: Viene utilizzata dal sistema per recuperare i file corrotti o danneggiati durante il processo di riparazione del filesystem.

@@ -1,0 +1,98 @@
+Per quanto detto, la modalità di esecuzione si alterna essenzialmente tra due fasi:
+
+	- Running User
+	- Running Kernel
+
+Si passa dall'una all'altra con le alterazioni di flusso come interrupt e trap.
+Quando il processo è in esecuzione e chiama una wrapper di syscall, per esempio read, entra in esecuzione la funzione in modalità Running User
+fino all'istruzione
+
+	int $0x80
+
+E qui entriamo in Running Kernel. Ma anche le operazioni interne al Kernel hanno una struttura, quindi nel caso della read dovrà fare una chiamata
+al driver dedicato all'I/O con il dispositivo richiesto e attendere risposta (il disco che gira, ad esempio, richiede il tempo necessario affinché
+si posizioni correttamente). Come attendo la risposta?
+
+	- Busy Waiting: la CPU gira a vuoto in attesa di ricevere il dato richiesto, monitorando una cella speciale di memoria che funge da flag.
+		Posso visualizzarla come una cosa del tipo
+
+			while(!flag) {}
+
+		ovvero a ogni ciclo controllo la variabile flag per vedere se è stata messa a 1 (questo processo si chiama Polling, è un po' come Ciuchino che
+		chiede a Shrek "siamo arrivati? siamo arrivati? siamo arrivati? ..."). Intuitivamente, non è una buona idea;
+
+	- Sleeping: il processo si sospende in attesa che il dispositivo generi un interrupt che segnala il completamento dell'operazione richiesta. In questo
+		stato il processo è detto Waiting (oppure Blocked, o Sleeping), e non richiede l'uso della CPU. Quando si genera l'interrupt, si torna in Running
+		Kernel e poi (tra parentesi, tramite una funzione iret di ritorno dall'interrupt che tanto si può usare solo in modalità Supervisore) al Running User.
+
+Il fatto che esista lo stato Sleeping per un processo suggerisce che i sistemi di calcolo sono progettati per prevedere l'ESECUZIONE CONCORRENTE, ovvero
+è prevista l'esecuzione simultanea di più processi. Come faccio? Invece di eseguire
+
+	A1	A2	A3	A4
+					B1	B2	B3	B4
+
+faccio ad esempio
+
+	A1		A2		A3		A4
+		B1		B2		B3		B4
+
+Notare che:
+
+	- In mezzo a questi passaggi c'è il Kernel che decide a chi dare il controllo per il prossimo intervallo del timer;
+	- L'intervallo di timer è dell'ordine dei millisecondi;
+	- Se ci sono più processi ci sono diverse strategie, a seconda di chi si vuole privilegiare (SCHEDULING);
+	- Se ci sono anche più core, chiaro che posso mettere un processo per ognuno. Se ci sono più processi che core, però, questo problema si ripresenta.
+
+E se A a un certo punto fa una syscall e va in Sleeping? Indichiamola con *, e indichiamo con @ l'arrivo dell'interrupt che segnala la fine dell'operazione richiesta.
+
+	| 1 tic	| 2	tic	|	3	|	4	|	5	| 	6	| 	7	|
+
+	A	A			A*					A 			A 	  A   	...
+		   2       2   1   2 	   2   3   2 	   2    4     	... 
+			B 	B 		B 	B 	B 	B@		B 	B  				...
+							
+						<-- A DORME -->
+
+Come si legge questo schema un po' mistico?
+
+	- In alto i "tic" del timer;
+
+	- A e B sono i processi;
+
+	- I numeri tra A e B classificano i momenti in cui il controllo passa al Kernel (interrupt) per decidere a chi assegnare l'uso della CPU:
+
+		- 1 è la syscall a read. Sincrono, volontario, recuperabile: Software Interrupt, ovvero il comando int 0x80;
+		- 2 è l'interrupt dato dal tic del timer. Asincrono, involontario (si intende sempre rispetto alla CPU, il cui clock è diverso dal timer), recuperabile;
+		- 3 è l'interrupt generato dal dispositivo che finisce l'operazione di lettura. Asincrono, involontario, recuperabile;
+		- 4 rappresenta una situazione in cui ad esempio muovo il mouse. Asincrono, involontario, recuperabile.
+
+Possiamo capire a questo punto cosa significa a questo punto l'output di
+
+	time ./A
+
+	- real: tempo effettivo "di orologio";
+
+	- user: somma dei tempi passati da A in modalità User. Come si misura? Esiste un altro timer con frequenza maggiore che chiede alla CPU chi è in esecuzione,
+		facendo da counter. Spesso capita di vedere un tempo di 0, perché comunque ha una precisione dell'ordine dei centesimi di secondo (<< tempi della CPU);
+
+	- sys : somma dei tempi spesi nel Kernel "per conto di" A (in questo caso, quando fa la syscall e quando riceve l'interrupt di ripresa di esecuzione).
+
+Ora, c'è una distinzione tra un processo Waiting e un processo a cui il Kernel toglie il controllo per "democrazia". Dare controllo ad A al tic 4 dell'esempio
+precedente è inutile, ma darglielo al tic 6 non lo è affatto. Un processo che non ha il controllo ma è pronto per continuare l'esecuzione è in stato READY.
+Tutti i processi iniziano in uno stato Ready, ovvero iniziano l'esecuzione (leggi: passano in Running User) non appena viene data loro la possibilità.
+Quando fa Scheduling, il Kernel sceglie un processo tra quelli in stato Ready e gli dà il core.
+
+Infine, il processo ha uno stato di terminazione, detto ZOMBIE. Sì, per davvero. E ci resta finché il processo genitore non raccoglie il valore di ritorno dal PCB.
+Questo può portare a situazioni spiacevoli in cui il genitore muore prima del figlio, che resta Zombie. Sì, può letteralmente esserci un'invasione di Zombie in un SO.
+Oltre a questo bisogna naturalmente liberare le risorse, come la memoria.
+
+SCHEDULING
+Lo schema di Scheduling segue generalmente due criteri di base:
+
+	- Fairness: "equità" nell'uso della CPU da parte dei processi Ready. C'è uno schema classico, detto Round Robin, che esegue tutti i processi a giro.
+		Tipicamente però in un SO i processi hanno diverse priorità, informazione contenuta nel PCB del processo. Possono verificarsi casi limite di "Starvation",
+		in cui un processo a bassa priorità non riceve mai il controllo della CPU. "La leggenda vuole che una volta spensero un IBM 360 e scoprirono un processo
+		fermo da 15 anni";
+
+	- Balancing: ci sono processi che richiedono poco uso della CPU, contro altri che ne richiedono tanto. Potrei scegliere di far "saltare la fila" a quelli che
+		ne richiedono poco.
