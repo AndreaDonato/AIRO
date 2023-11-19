@@ -6,16 +6,20 @@ C'è un wrapper di syscall chamata fork() che clona il processo padre e lo mette
 	
 	- Successo: Il figlio è stato creato, fork restituisce
 
-		- Al genitore, il valore del PID (> 0) del figlio;
-		- Al figlio, il valore 0.
+		- Al genitore il valore del PID (> 0) del figlio;
+		- Al figlio il valore 0.
 
 A questo punto sono in grado di elaborare un if e capire se mi trovo nel genitore o nel figlio.
+
+	#include <unistd.h>
+
+	[...]
 
 	pid_t pid = fork()
 
 	if(pid == -1)
 	{
-		perror("Errore nella fork\n");
+		perror("Errore nella fork\n"); 			// Ad esempio se supero il numero CHILD_MAX di processi figli, o se non ho abbastanza memoria
 		exit(1);
 	}
 
@@ -94,7 +98,39 @@ Perché uso _exit? Ci sono diverse versioni della syscall exit:
 La fork duplica lo spazio di memoria, ma condivide gli stessi canali I/O tra genitore e figlio. Questo è il motivo per cui il programma che lancio da shell
 scrive sulla shell stessa.
 
+Ora, finora il codice del figlio è nel codice del processo padre. Come faccio ad eseguire altro?
+Esiste la famiglia di syscall EXEC. Fissato il PID del processo che la invoca, questa sovrascrive la memoria corrispondente con quella del nuovo file eseguibile.
+In pratica, EXEC attiva il modulo loader del Kernel.
+
+	- int execv(const char* path, char* const argv[]): Anzitutto notare l'uso di const. Nel primo caso path è un puntatore a un buffer costante (ovvero è garantito
+		che execv non modificherà il buffer puntato da path). Nel secondo argv è un {puntatore a un array (= argv[])} di {stringhe (= char*)}, è garantito che execv
+		non modifichi il puntatore all'array argv[] ma può in linea di principio modificarne le stringhe contenute. Se ad esempio scrivo
+
+			ls -l -a
+
+		il vettore argv[] contiene come elementi "ls", "-l", "-a" e NULL (terminatore);
+
+	- int execvp(const char* executable, char* const argv[]): Identico alla precedente, ma non devo specificare il path. Il programma eseguibile viene automaticamente
+		cercato in tutte le cartelle specificate nella variabile d'ambiente PATH;
+
+Una qualsiasi funzione EXEC restituisce solo -1, e rappresenta un errore. Questo perché se va a buon fine fa suicidare il processo chiamante.
+
+Lo schema di funzionamento è quindi
+
+	fork()
+	|
+	|______ exec()
+	|      	 |
+	| 		 |
+	|
+	wait()
+
+
+
+
+
+export PATH=$PATH:. 			// Aggiunge alla variabile l'ambiente PATH la cartella corrente. Così posso eseguire gli elf di questa cartella senza ./ davanti
+
+
 
 Simpatica scoperta degna di nota: Ctrl+x mette il processo in stato di Waiting, mentre Ctrl+c lo killa.
-
-L 22 m 45
