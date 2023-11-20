@@ -1,0 +1,51 @@
+Nonostante la realtà fisica sia diversa, è possibile vedere in modo astratto la memoria come un array lineare di byte.
+Le macchine passano la maggior parte del loro tempo eseguendo operazioni come
+
+	movl (%ecx), %eax 		# Lettura della memoria
+	movl %eax, (%ecx) 		# Scrittura della memoria
+
+Lo schema corrispondente sarà una cosa del tipo
+
+	CPU (Registri)  <--->  I/O Bridge  <--->  RAM
+
+dove le frecce di collegamento sono date dal Memory Bus.
+Vediamo, semplificando, cosa avviene in fase di transazione di lettura della memoria.
+
+	- L'indirizzo contenuto in %ecx (chiaimiamolo A) viene messo sul Memory Bus, ovvero ci sono 32 (64) linee fisiche
+		ognuna contenente l'informazione sottoforma di impulso elettrico di un bit di A che portano il segnale alla RAM;
+
+	- La RAM risponde rimpiazzando A con il valore (x) corrispondente all'indirizzo A;
+
+	- Il valore x viaggia sul bus e viene scritto in %eax.
+
+Questo processo spiega in parte perché nell'ISA non sono previste operazioni con due operandi a memoria. Nonostante sia
+CISC, un doppio spostamento di questo tipo risulta troppo complesso. Vediamo allora la scrittura (semplificata):
+
+	- La CPU deposita sul bus l'indirizzo destinazione A;
+
+	- La RAM, ricevuto A, si mette in attesa che sul bus venga scritto il valore x da memorizzare in A;
+
+	- La RAM prende x dal bus e lo scrive su A.
+
+Quanto tempo ci vuole per accedere alla memoria? Tipicamente parliamo di
+
+	- Decine di nanosecondi solo per mettere in piedi la comunicazione;
+
+	- Almeno il triplo per completare il trasferimento dati.
+
+Ma una CPU a 1 GHz ha tempi caratteristici di frazioni di nanosecondo, che vanno quindi confrontati con ordini di centinaia.
+Oltretutto, il divario tra questi due tempi caratteristici è cresciuto nel tempo, perché le CPU venivano velocizzate più rapidamente.
+L'ottimizzazione base (-O1) del compilatore gcc, a tal proposito, è proprio quella di allocare quanti più registri possibile per evitare I/O con memoria.
+
+Ora, come compenso questa cosa?
+C'è una roba chiamato Principio di Località: si è notato che i programmi non accedono ai dati in modo casuale, ma tendono a esibire LOCALITA' negli accessi.
+
+	- Località temporale: se accedo a un oggetto in memoria, è probabile che riaccederò allo stesso oggetto a breve (es: variabile indice di un ciclo).
+		Come conseguenza tengo questi oggetti nei registri;
+
+	- Località spaziale : se accedo a un oggetto in memoria, è probabile che accederò a oggetti con indirizzi "vicini" a breve (es: array).
+
+Sfruttare la località temporale è immediato, ma come sfrutto quella spaziale?
+Ricordando che esiste una gerarchia di memorie, invece di accedere alla DRAM provo ad accedere alla SRAM (CACHE). Ovvero, nel momento in cui ho
+un array e accedo a v[0], oltre a recuperarne il valore copio il blocco di memoria che lo contiene dalla DRAM alla SRAM. In questo modo se subito
+dopo accedo a v[1] dovrò interfacciarmi con la cache, il cui tempo caratteristico è un ordine di grandezza inferiore.
