@@ -26,7 +26,9 @@ Ogni segnale ha un handler di default. Ci sono delle costanti predefinite in sig
 		il segnale, il processo termina. Viene per questo chiamato "Graceful termination". Generato dal comando "kill" senza il "-9".
 		"Guarda che devi morire, ma ti dò la possibilità di sistemare le tue cose prima di farlo";
 
-	- SIGINT: Ordine di interruzione per un processo. Come SIGTERM ma può essere inviato da utente con Ctrl+C sulla Shell.
+	- SIGINT: Ordine di interruzione per un processo. Come SIGTERM ma può essere inviato da utente con Ctrl+C sulla Shell (MITTENTE);
+
+	- SIGCHLD: Segnale inviato dal figlio al genitore, indicandone la terminazione;
 
 Per alcuni segnali è possibile sostituire l'handler di default con uno personalizzato, che è il motivo per cui è possibile ignorarli o gestirli.
 
@@ -35,6 +37,33 @@ Come si invia un segnale ad un processo? Con il comando kill, ma ci sono due ver
 	- Core-util: la versione programma eseguibile, invocabile dalla shell.
 	- syscall: invocabile da programma C.
 
-Come raccolgo l'errore? Il modo più semplice è la funzione signal (ma è deprecata).
+Come raccolgo l'errore? Il modo più semplice è la funzione signal (ma è deprecata), mentre quella più usata è
 
-L 24 (mi sa che ha continuato a spiegare queste cose nell'esercitazione...)
+	int sigaction (int signum, struct sigaction* act, struct sigation* oldact);
+
+	- Restituisce 0 (corretta esecuzione) o -1 (errore);
+
+	- Accetta parametri
+		- signum, ovvero il segnale da catturare (SIGTERM, SIGINT, ...);
+		- act, ovvero le nuove azioni di gestione del segnale;
+		- oldact, ovvero le vecchie azioni di gestione del segnale; 
+
+Spesso le syscall richiedono tanti parametri, quindi il trucco è di passare pochi parametri sottoforma di strutture. In questo caso questa ha campi
+
+	- sa_handler: Puntatore all'handler del segnale;
+	- Gli altri non li ha detti, se proprio vuoi guardati 'man sigaction' su terminale.
+
+Notare che esiste una struct che si chiama come la funzione. Per come è scritto il C, si può fare: le struct non "vedono" gli altri identificatori.
+Tutto questo significa che posso scrivere una cosa del tipo
+
+	void handler(int signum);					// handler personalizzato
+
+	[...]
+
+	struct sigaction act = {0};					// Inizializza tutti i byte della struct a 0
+	act.sa_handler = my_handler;
+	int res = sigaction(SIGTERM, &act, NULL); 	// syscall che modifica l'handler standard di SIGTERM con my_handler, senza salvare la configurazione precedente (NULL)
+
+Cosa succede se sto eseguendo una syscall (es. write) e arriva un segnale? Unix decide di interromperla. Un modo efficace di usare la write, infatti, è metterla in un
+ciclo. Questa restituisce il numero di byte scritti, e se non corrispondono con quelli che intendevo scrivere significa che non ha finito.
+Esiste una syscall, pause(), che mette in waiting un processo fino all'arrivo di un segnale (come sleep(), ma in questo caso l'attesa ha durata indefinita).
