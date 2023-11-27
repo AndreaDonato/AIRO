@@ -1,4 +1,4 @@
-IA-32, variante dell'ISA x86 a 32 bit
+IA-32 (Intel Architecture 32bit), variante dell'ISA x86 a 32 bit
 
 Non il più moderno (lo è invece AMD64, a 64bit) ma l'estensione è semplice (ed è retrocompatibile).
 ISA definisce:
@@ -76,7 +76,7 @@ in AT&T, mov ha suffissi che si riferiscono alla lunghezza dei bit su cui operar
 Poi, ogni valore numerico deve essere preceduto da $, altrimenti viene interpretato come indirizzo di memoria.
 Infine, % precede i registri. %eax si riferisce ai 32 bit del registro A. La e sta per extended: storicamente il registro è a 16 bit, e si invoca con %ax.
 E perché metto la x? Perchè potrei prendere anche solo i primi 8 bit (%al, "low") oppure i secondi 8 bit (%ah, "high", ma non si usa). Se lavorassi a 64 bit
-chiamerei l'intero registro %reax. Posso usare il singolo registro per memorizzare due char (%ah e %al, per quanto in realtà non si fa mai ... "magari se devi
+chiamerei l'intero registro %rax. Posso usare il singolo registro per memorizzare due char (%ah e %al, per quanto in realtà non si fa mai ... "magari se devi
 scrivere un virus ti serve") ma non due short. Se cambio qualcosa in %ax, il resto dei bit resta immutato. Da A a D l'estensione dei nomi è banale, per SI e DI
 sono %esi ed %edi. In generale la x è sostituita da i. Passiamo a un programmino più difficile.
 

@@ -51,14 +51,14 @@ Ci sono a questo punto diversi tipi di operando a memoria:
 
 			movl 8(%eax, %ecx, 4), %ebx
 
-		ovvero salva in ebx l'indirizzo eax + ecx*4 + 8
+		ovvero salva in ebx il contenuto dell'indirizzo eax + ecx*4 + 8
 		
 
 TRADUZIONE IF ELSE IN ASSEMBLY
 
 	int f(int a)
 	{
-		if(a>10) a = 10;
+		if(a > 10) a = 10;
 		return a;
 	}
 

@@ -119,5 +119,3 @@ La CPU ha un flag che tiene traccia dei privilegi con cui sta effettuando una ce
 Questo perché lasciare la libertà all'utente di scrivere su certi indirizzi non è una grande idea. Il SO ha i permessi da supervisore (ovviamente).
 NON esiste alcuna istruzione per passare in modalità supervisore. Cose come root e sudo ti permettono di trasformarti nel super-utente con tutti i permessi da utente,
 ma sempre utente resti.
-
-L19

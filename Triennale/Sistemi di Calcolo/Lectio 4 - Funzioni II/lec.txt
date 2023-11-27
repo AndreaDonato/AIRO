@@ -5,37 +5,37 @@ Non viene mai manipolato direttamente dal programmatore, ma dalle istruzioni. E'
 
 	- Bit 2 - PF (Parity Flag): Viene messo a 1 se il risultato binario dell'operazione contiene un numero pari di 1;
 
-	- Bit 4 - AF (Auxiliary Carry Flag): Come CF, ma specifico per il riporto tra i bit meno significativi e più significativi. Poco usato (...);
+		- Bit 4 - AF (Auxiliary Carry Flag): Come CF, ma specifico per il riporto tra i bit meno significativi e più significativi. Poco usato (...);
 
 	- Bit 6 - ZF (Zero Flag): Viene messo a uno se il risultato dell'operazione è zero;
 
 	- Bit 7 - SF (Sign Flag): Viene messo a uno se il risultato dell'operazione è negativo;
 
-	- Bit 8 - TF (Trap Flag): Usato in fase di debugging (...);
+		- Bit 8 - TF (Trap Flag): Usato in fase di debugging (...);
 
-	- Bit 9 - IF (Interrupt Flag): Abilita o disabilita gli interrupt esterni (???);
+		- Bit 9 - IF (Interrupt Flag): Abilita o disabilita gli interrupt esterni (Vedere lezioni finali);
 
-	- Bit 10 - DF (Direction Flag): Indica la direzione delle operazioni svolte su una stringa (...);
+		- Bit 10 - DF (Direction Flag): Indica la direzione delle operazioni svolte su una stringa (...);
 
 	- Bit 11 - OF (Overflow Flag): Viene messo a uno se l'operazione (con segno) ha causato un overflow;
 
-	- Bit 12/13 - IOPL (I/O Privilege Level Flag): Indicano il livello di privilegio richiesto per eseguire operazioni di I/O (...);
+		- Bit 12/13 - IOPL (I/O Privilege Level Flag): Indicano il livello di privilegio richiesto per eseguire operazioni di I/O (...);
 
-	- Bit 14 - NT (Nested Task Flag): Utilizzato per indicare che c'è una tabella dei descrittori delle attività nidificate (???????????????);
+		- Bit 14 - NT (Nested Task Flag): Utilizzato per indicare che c'è una tabella dei descrittori delle attività nidificate (???????????????);
 
-	- Bit 16 - RF (Resume Flag): Controlla la ripresa del'esecuzione dopo un'interruzione di debug (...);
+		- Bit 16 - RF (Resume Flag): Controlla la ripresa del'esecuzione dopo un'interruzione di debug (...);
 
-	- Bit 17 - VM (Virtual-8086 Mode Flag): Indica l'esecuzione in modalità virtuale 8086 (??????);
+		- Bit 17 - VM (Virtual-8086 Mode Flag): Indica l'esecuzione in modalità virtuale 8086 (??????);
 
-	- Bit 18 - AC (Alignment Check Flag): Indica l'attivazione del controllo di allineamento in operazioni di accesso alla memoria (????);
+		- Bit 18 - AC (Alignment Check Flag): Indica l'attivazione del controllo di allineamento in operazioni di accesso alla memoria (????);
 
-	- Bit 19 - VIF (Virtual Interrupt Flag): Indica la permessività dell'emulazione degli interrupt virtuali (???????);
+		- Bit 19 - VIF (Virtual Interrupt Flag): Indica la permessività dell'emulazione degli interrupt virtuali (???????);
 
-	- Bit 20 - VIP (Virtual Interrupt Pending Flag): Indica la presenza di interrupt virtuali in sospeso (???????);
+		- Bit 20 - VIP (Virtual Interrupt Pending Flag): Indica la presenza di interrupt virtuali in sospeso (???????);
 
-	- Bit 21 - ID (Identification Flag): Indica la presenza di istruzioni di identificazione dei processori (????).
+		- Bit 21 - ID (Identification Flag): Indica la presenza di istruzioni di identificazione dei processori (????).
 
-Notare che ci sono diversi bit liberi. Questo perché li si conserva per eventuali aggiornamenti futuri senza dover stravolgere l'architettura retrocompatibile.
+Notare che ci sono diversi bit liberi. Questo perché li si conserva per eventuali aggiornamenti futuri senza dover stravolgere l'architettura (garantisce retrocompatibilità).
 
 Cosa fa l'istruzione compare? cmp S, D fa D-S, come la sottrazione ma non modifica D, ma fa side-effect su ZF. A questo punto i test Jcc corrispondono a
 
@@ -95,7 +95,7 @@ INTEGER PROMOTION: in C, qualsiasi parametro attuale più corto di int viene "pr
 	Se il numero è positivo viene esteso con tutti zeri, se è negativo tutti uno (ricordiamo che -1 in binario è rappresentato come 111111111).
 
 WORD SIZE: numero di bit che possono essere manipolati da una singola operazione macchina
-	Definisce anche la memoria massima (indirizzi). A 32bit ho massimo 4Gb. A 64bit oltre 16Tb.
+	Definisce anche la memoria massima (indirizzi). A 32bit ho massimo 4Gb. A 64bit 16Tb.
 
 PUNTATORI.
 Se scrivo in C
